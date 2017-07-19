@@ -33,7 +33,6 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
     public void onBindViewHolder(TodoViewHolder holder, int position) {
         Todo todo = mTodos.get(position);
         holder.mTodoTitleTextView.setText(todo.getTitle());
-        holder.mTodoDescriptionTextView.setText(todo.getDescription());
     }
 
     @Override
@@ -44,13 +43,11 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
     public class TodoViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mTodoTitleTextView;
-        public TextView mTodoDescriptionTextView;
         public TextView mTodoDateTextView;
 
         public TodoViewHolder(View itemView) {
             super(itemView);
             mTodoTitleTextView = itemView.findViewById(R.id.todoTitleTextView);
-            mTodoDescriptionTextView = itemView.findViewById(R.id.todoDescriptionTextView);
             mTodoDateTextView = itemView.findViewById(R.id.todoDateTextView);
         }
     }
