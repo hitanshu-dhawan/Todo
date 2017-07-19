@@ -1,5 +1,7 @@
 package com.hitanshudhawan.todo;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,12 +12,14 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
 
+        setTitle("Todos");
+
         mTodos = new ArrayList<>();
-        for(int i=0;i<20;i++) {
+        for (int i = 0; i < 20; i++) {
             Todo todo = new Todo();
-            todo.setTitle("title" + (i+1));
+            todo.setTitle("title" + (i + 1));
             mTodos.add(todo);
         }
 
@@ -65,14 +71,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if(newState == RecyclerView.SCROLL_STATE_IDLE)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE)
                     mFab.show();
                 else
                     mFab.hide();
             }
         });
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;
@@ -80,7 +86,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-
+                if (direction == ItemTouchHelper.LEFT) {
+                    // TODO add_todo
+                } else {
+                    // TODO delete_todo
+                }
             }
 
             @Override
@@ -91,27 +101,26 @@ public class MainActivity extends AppCompatActivity {
                 float height = (float) itemView.getBottom() - (float) itemView.getTop();
                 float width = height / 3;
 
-                if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    if(dX > 0) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    if (dX > 0) {
                         Paint p = new Paint();
                         p.setColor(Color.parseColor("#388E3C"));
-                        RectF background = new RectF((float) itemView.getLeft(),(float) itemView.getTop(),dX,(float) itemView.getBottom());
-                        c.drawRect(background,p);
+                        RectF background = new RectF((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom());
+                        c.drawRect(background, p);
                         c.clipRect(background);
-                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.mipmap.ic_done_white_48dp);
-                        RectF icon_dest = new RectF((float) itemView.getLeft() + width ,(float) itemView.getTop() + width,(float) itemView.getLeft()+ 2*width,(float)itemView.getBottom() - width);
-                        c.drawBitmap(bitmap,null,icon_dest,p);
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_done_white_48dp);
+                        RectF icon_dest = new RectF((float) itemView.getLeft() + width, (float) itemView.getTop() + width, (float) itemView.getLeft() + 2 * width, (float) itemView.getBottom() - width);
+                        c.drawBitmap(bitmap, null, icon_dest, p);
                         c.restore();
-                    }
-                    else {
+                    } else {
                         Paint p = new Paint();
                         p.setColor(Color.parseColor("#D32F2F"));
-                        RectF background = new RectF((float) itemView.getRight() + dX,(float) itemView.getTop(),(float) itemView.getRight(),(float) itemView.getBottom());
-                        c.drawRect(background,p);
+                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
+                        c.drawRect(background, p);
                         c.clipRect(background);
-                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.mipmap.ic_delete_white_48dp);
-                        RectF icon_dest = new RectF((float) itemView.getRight() - 2*width ,(float) itemView.getTop() + width,(float) itemView.getRight() - width,(float)itemView.getBottom() - width);
-                        c.drawBitmap(bitmap,null,icon_dest,p);
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_delete_white_48dp);
+                        RectF icon_dest = new RectF((float) itemView.getRight() - 2 * width, (float) itemView.getTop() + width, (float) itemView.getRight() - width, (float) itemView.getBottom() - width);
+                        c.drawBitmap(bitmap, null, icon_dest, p);
                         c.restore();
                     }
                 }
@@ -123,6 +132,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                AlertDialog.Builder aleartDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                aleartDialogBuilder.setTitle("Add Todo");
+                aleartDialogBuilder.setView(getLayoutInflater().inflate(R.layout.add_dialog_box,null));
+                aleartDialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+                AlertDialog alertDialog = aleartDialogBuilder.create();
+                alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                alertDialog.show();
             }
         });
 
