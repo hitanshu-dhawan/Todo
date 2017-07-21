@@ -39,7 +39,10 @@ import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter;
 import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
 import jp.wasabeef.recyclerview.animators.FadeInLeftAnimator;
+import jp.wasabeef.recyclerview.animators.FadeInRightAnimator;
+import jp.wasabeef.recyclerview.animators.FlipInRightYAnimator;
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
+import jp.wasabeef.recyclerview.animators.OvershootInRightAnimator;
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
 
@@ -77,18 +80,21 @@ public class MainActivity extends AppCompatActivity {
         slideInBottomAnimationAdapter.setDuration(300);
         mRecyclerView.setAdapter(slideInBottomAnimationAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this,DividerItemDecoration.VERTICAL));
-        mRecyclerView.setItemAnimator(new LandingAnimator());
+        //mRecyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this,DividerItemDecoration.VERTICAL));
+        mRecyclerView.setItemAnimator(new FadeInRightAnimator());
         mRecyclerView.getItemAnimator().setAddDuration(300);
+        mRecyclerView.getItemAnimator().setRemoveDuration(0);
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mFab.show();
-                else
+                }
+                else {
                     mFab.hide();
+                }
             }
         });
 
@@ -128,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     alertDialogBuilder.setPositiveButton("okay", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            mAdapter.notifyItemChanged(position);
+                            mAdapter.notifyDataSetChanged();
                         }
                     });
                     alertDialogBuilder.create().show();
@@ -204,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
                         mTodos.add(0,todo);
                         mAdapter.notifyItemInserted(0);
-                        mRecyclerView.scrollToPosition(0);
+
 
                         // todo add in sorted order.
                         // also recycler view scroll to added position.
