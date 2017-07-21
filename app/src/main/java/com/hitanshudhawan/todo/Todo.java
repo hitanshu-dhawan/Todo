@@ -18,6 +18,14 @@ public class Todo {
         this.mDate = mDate;
     }
 
+    public Todo(long id, String mTitle, Long dateTimeInMillis) {
+        this.id = id;
+        this.mTitle = mTitle;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(dateTimeInMillis);
+        this.mDate = calendar;
+    }
+
     public long getId() {
         return id;
     }
