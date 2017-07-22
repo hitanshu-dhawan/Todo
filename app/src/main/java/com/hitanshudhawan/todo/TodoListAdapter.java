@@ -1,6 +1,7 @@
 package com.hitanshudhawan.todo;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -38,8 +39,12 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
     @Override
     public void onBindViewHolder(TodoViewHolder holder, int position) {
         Todo todo = mTodos.get(position);
-        holder.mTodoTitleTextView.setText(todo.getTitle());
+        holder.mTodoTitleTextView.setText(todo.getTitle().replaceAll("\n"," "));
         holder.mTodoDateTextView.setText(getStringDate(todo.getDate()));
+        if(holder.mTodoDateTextView.getText().toString().equals("Overdue"))
+            holder.mTodoDateTextView.setTextColor(Color.RED);
+        else
+            holder.mTodoDateTextView.setTextColor(Color.GRAY);
     }
 
     @Override
