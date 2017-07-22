@@ -2,6 +2,7 @@ package com.hitanshudhawan.todo;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +62,7 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
     private String getStringDate(Calendar todoDateTime) {
 
         if(todoDateTime.getTimeInMillis() == Long.MIN_VALUE)
-            return "!...!";
+            return "";
 
         Calendar calendar;
 
@@ -70,13 +71,25 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
             return "Overdue";
 
         calendar = Calendar.getInstance();
-        if(calendar.get(Calendar.YEAR) == todoDateTime.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == todoDateTime.get(Calendar.DAY_OF_YEAR))
-            return "Today";
+        if(calendar.get(Calendar.YEAR) == todoDateTime.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == todoDateTime.get(Calendar.DAY_OF_YEAR)) {
+            SimpleDateFormat simpleDateFormat;
+            if(DateFormat.is24HourFormat(mContext))
+                simpleDateFormat = new SimpleDateFormat("h:mm");
+            else
+                simpleDateFormat = new SimpleDateFormat("h:mm a");
+            return "Today, " +simpleDateFormat.format(todoDateTime.getTime());
+        }
 
         calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR,1);
-        if(calendar.get(Calendar.YEAR) == todoDateTime.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == todoDateTime.get(Calendar.DAY_OF_YEAR))
-            return "Tomorrow";
+        if(calendar.get(Calendar.YEAR) == todoDateTime.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == todoDateTime.get(Calendar.DAY_OF_YEAR)) {
+            SimpleDateFormat simpleDateFormat;
+            if(DateFormat.is24HourFormat(mContext))
+                simpleDateFormat = new SimpleDateFormat("h:mm");
+            else
+                simpleDateFormat = new SimpleDateFormat("h:mm a");
+            return "Tomorrow, " +simpleDateFormat.format(todoDateTime.getTime());
+        }
 
         calendar = Calendar.getInstance();
         if(calendar.get(Calendar.YEAR) == todoDateTime.get(Calendar.YEAR) && calendar.get(Calendar.WEEK_OF_YEAR) == todoDateTime.get(Calendar.WEEK_OF_YEAR))

@@ -1,5 +1,7 @@
 package com.hitanshudhawan.todo;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -22,12 +24,16 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.hitanshudhawan.todo.database.TodoDBHelper;
 
@@ -129,15 +135,29 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     // TODO show date dialog..
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                    alertDialogBuilder.setTitle("Sort By");
-                    alertDialogBuilder.setPositiveButton("okay", new DialogInterface.OnClickListener() {
+                    final Calendar currentDateTime = Calendar.getInstance();
+                    final Calendar todoDateTime = Calendar.getInstance();
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
                         @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            mAdapter.notifyDataSetChanged();
+                        public void onDateSet(DatePicker datePicker, final int year, final int month, final int dayOfMonth) {
+                            TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
+
+                                    todoDateTime.set(year,month,dayOfMonth,hourOfDay,minute);
+
+                                    mTodos.get(position).setDate(todoDateTime);
+                                    mAdapter.notifyItemChanged(position);
+                                    changeTodoDateIntoDB(id,todoDateTime);
+                                }
+                            },currentDateTime.get(Calendar.HOUR_OF_DAY),currentDateTime.get(Calendar.MINUTE),DateFormat.is24HourFormat(MainActivity.this));
+                            timePickerDialog.show();
                         }
-                    });
-                    alertDialogBuilder.create().show();
+                    },currentDateTime.get(Calendar.YEAR),currentDateTime.get(Calendar.MONTH),currentDateTime.get(Calendar.DAY_OF_MONTH));
+                    datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+                    datePickerDialog.show();
+
+                    mAdapter.notifyDataSetChanged();
                 }
 
             }
@@ -213,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                         // todo add in sorted order.
-                        // also recycler view scroll to added position.
+                        //
 
                         // todo notification.
                         // if isTimeSet==false set time for notification now()+something.
@@ -240,6 +260,25 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+
+                // TODO search not working.
+                mTodos = fetchTodosFromDB();
+
+                if(newText.trim().isEmpty()) {
+                    mTodos = fetchTodosFromDB();
+                    mAdapter.notifyDataSetChanged();
+                    return false;
+                }
+
+                for(int i=0; i < mTodos.size(); i++) {
+                    if(!mTodos.get(i).getTitle().toLowerCase().contains(newText.toLowerCase())) {
+                        mTodos.remove(i);
+                        i--;
+                    }
+                }
+
+                mAdapter.notifyDataSetChanged();
+
                 return false;
             }
         });
@@ -313,6 +352,17 @@ public class MainActivity extends AppCompatActivity {
         Todo todo = new Todo(id, todoTitle, dateTimeInMillis);
 
         return todo;
+    }
+
+    private void changeTodoDateIntoDB(long id, Calendar todoDateTime) {
+
+        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
+        SQLiteDatabase database = todoDBHelper.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TodoDBHelper.TODO_DATE, todoDateTime.getTimeInMillis());
+
+        database.update(TodoDBHelper.TABLE_NAME, contentValues, TodoDBHelper._ID + " = " + id, null);
     }
 
 }
