@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     doneSnackbar.show();
                 }
                 else {
-                    // TODO show date dialog..
+
                     final Calendar currentDateTime = Calendar.getInstance();
                     final Calendar todoDateTime = Calendar.getInstance();
                     DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
@@ -249,26 +249,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        // TODO Search not working.
-        // todo hide fab when searching
+        // TODO hide fab when searching
 
         MenuItem searchMenuItem = menu.findItem(R.id.search_item);
         mSearchView = (SearchView) searchMenuItem.getActionView();
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(MainActivity.this, "onQueryTextSubmit", Toast.LENGTH_SHORT).show();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Toast.makeText(MainActivity.this, "onQueryTextChange", Toast.LENGTH_SHORT).show();
-                // TODO: search not working.
-                mTodos = fetchTodosFromDB();
+
+                mTodos.clear();
+                mTodos.addAll(fetchTodosFromDB());
 
                 if(newText.trim().isEmpty()) {
-                    mTodos = fetchTodosFromDB();
                     mAdapter.notifyDataSetChanged();
                     return false;
                 }
@@ -279,19 +276,12 @@ public class MainActivity extends AppCompatActivity {
                         i--;
                     }
                 }
-
                 mAdapter.notifyDataSetChanged();
 
                 return false;
             }
         });
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                Toast.makeText(MainActivity.this, "onClose", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
+
 
 
         return true;
