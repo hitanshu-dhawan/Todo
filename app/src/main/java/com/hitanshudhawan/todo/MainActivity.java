@@ -3,7 +3,6 @@ package com.hitanshudhawan.todo;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -15,41 +14,35 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.hitanshudhawan.todo.adapters.TodoListAdapter;
 import com.hitanshudhawan.todo.database.TodoDBHelper;
+import com.hitanshudhawan.todo.models.Todo;
+import com.hitanshudhawan.todo.utils.RecyclerItemClickListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
-import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter;
 import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
-import jp.wasabeef.recyclerview.animators.FadeInLeftAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInRightAnimator;
-import jp.wasabeef.recyclerview.animators.FlipInRightYAnimator;
-import jp.wasabeef.recyclerview.animators.LandingAnimator;
-import jp.wasabeef.recyclerview.animators.OvershootInRightAnimator;
-import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -58,8 +51,40 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Todo> mTodos;
     TodoListAdapter mAdapter;
 
+    ArrayList<Todo> mSelectedTodos;
+    boolean isMultiSelect;
+    ActionMode mActionMode;
+
     SearchView mSearchView;
     FloatingActionButton mFab;
+
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_multi_select, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            // TODO
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+            isMultiSelect = false;
+            mSelectedTodos.clear();
+            mAdapter.notifyDataSetChanged();
+        }
+    };
 
 
     @Override
@@ -80,8 +105,10 @@ public class MainActivity extends AppCompatActivity {
     private void initRecyclerView() {
 
         mTodos = fetchTodosFromDB();
+        mSelectedTodos = new ArrayList<>();
+        mActionMode = null;
 
-        mAdapter = new TodoListAdapter(MainActivity.this, mTodos);
+        mAdapter = new TodoListAdapter(MainActivity.this, mTodos, mSelectedTodos);
         SlideInBottomAnimationAdapter slideInBottomAnimationAdapter = new SlideInBottomAnimationAdapter(mAdapter);
         slideInBottomAnimationAdapter.setDuration(300);
         mRecyclerView.setAdapter(slideInBottomAnimationAdapter);
@@ -91,7 +118,29 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setRemoveDuration(0);
 
         // TODO
-        //mRecyclerView.addOnItemTouchListener(new );
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if(isMultiSelect) {
+                    multiSelect(position);
+                }
+                else {
+                    // TODO
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                if(!isMultiSelect) {
+                    mSelectedTodos.clear();
+                    isMultiSelect = true;
+                    if(mActionMode == null) {
+                        mActionMode = startSupportActionMode(mActionModeCallback);
+                    }
+                }
+                multiSelect(position);
+            }
+        }));
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -145,14 +194,13 @@ public class MainActivity extends AppCompatActivity {
                             TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
                                 @Override
                                 public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
-
                                     todoDateTime.set(year,month,dayOfMonth,hourOfDay,minute);
 
                                     mTodos.get(position).setDate(todoDateTime);
                                     mAdapter.notifyItemChanged(position);
                                     changeTodoDateIntoDB(id,todoDateTime);
                                 }
-                            },currentDateTime.get(Calendar.HOUR_OF_DAY),currentDateTime.get(Calendar.MINUTE),DateFormat.is24HourFormat(MainActivity.this));
+                            },0,0,DateFormat.is24HourFormat(MainActivity.this));
                             timePickerDialog.show();
                         }
                     },currentDateTime.get(Calendar.YEAR),currentDateTime.get(Calendar.MONTH),currentDateTime.get(Calendar.DAY_OF_MONTH));
@@ -175,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                     if (dX > 0) {
                         Paint p = new Paint();
-                        p.setColor(Color.parseColor("#388E3C")); //700
+                        p.setColor(ContextCompat.getColor(MainActivity.this, R.color.colorTodoDone));
                         RectF background = new RectF((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom());
                         c.drawRect(background, p);
                         c.clipRect(background);
@@ -185,8 +233,7 @@ public class MainActivity extends AppCompatActivity {
                         c.restore();
                     } else {
                         Paint p = new Paint();
-                        p.setColor(Color.parseColor("#FFA000")); //700
-                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
+                        p.setColor(ContextCompat.getColor(MainActivity.this, R.color.colorTodoDateChange));                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
                         c.drawRect(background, p);
                         c.clipRect(background);
                         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_date_range_white_48dp);
@@ -245,6 +292,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void multiSelect(int position) {
+        if(mActionMode != null) {
+            if(mSelectedTodos.contains(mTodos.get(position)))
+                mSelectedTodos.remove(mTodos.get(position));
+            else
+                mSelectedTodos.add(mTodos.get(position));
+
+            if(mSelectedTodos.size() == 1)
+                mActionMode.setTitle(mSelectedTodos.size() + " todo selected");
+            else if(mSelectedTodos.size() > 1)
+                mActionMode.setTitle(mSelectedTodos.size() + " todos selected");
+            else
+                mActionMode.finish();
+
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

@@ -1,17 +1,19 @@
-package com.hitanshudhawan.todo;
+package com.hitanshudhawan.todo.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.text.Annotation;
+import com.hitanshudhawan.todo.R;
+import com.hitanshudhawan.todo.models.Todo;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,10 +26,12 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
 
     private Context mContext;
     private ArrayList<Todo> mTodos;
+    private ArrayList<Todo> mSelectedTodos;
 
-    public TodoListAdapter(Context context, ArrayList<Todo> todos) {
+    public TodoListAdapter(Context context, ArrayList<Todo> todos, ArrayList<Todo> selectedTodos) {
         mContext = context;
         mTodos = todos;
+        mSelectedTodos = selectedTodos;
     }
 
     @Override
@@ -45,6 +49,10 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
             holder.mTodoDateTextView.setTextColor(Color.RED);
         else
             holder.mTodoDateTextView.setTextColor(Color.GRAY);
+        if(mSelectedTodos.contains(mTodos.get(position)))
+            holder.mTodoListItem.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorTodoSelected));
+        else
+            holder.mTodoListItem.setBackgroundColor(Color.WHITE);
     }
 
     @Override
@@ -54,13 +62,15 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
 
     public class TodoViewHolder extends RecyclerView.ViewHolder {
 
+        public RelativeLayout mTodoListItem;
         public TextView mTodoTitleTextView;
         public TextView mTodoDateTextView;
 
         public TodoViewHolder(View itemView) {
             super(itemView);
-            mTodoTitleTextView = itemView.findViewById(R.id.todoTitleTextView);
-            mTodoDateTextView = itemView.findViewById(R.id.todoDateTextView);
+            mTodoListItem = (RelativeLayout) itemView.findViewById(R.id.todoListItem);
+            mTodoTitleTextView = (TextView) itemView.findViewById(R.id.todoTitleTextView);
+            mTodoDateTextView = (TextView) itemView.findViewById(R.id.todoDateTextView);
         }
     }
 
