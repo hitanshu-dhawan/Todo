@@ -86,10 +86,12 @@ public class MainActivity extends AppCompatActivity {
         slideInBottomAnimationAdapter.setDuration(300);
         mRecyclerView.setAdapter(slideInBottomAnimationAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        //mRecyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this,DividerItemDecoration.VERTICAL));
         mRecyclerView.setItemAnimator(new FadeInRightAnimator());
         mRecyclerView.getItemAnimator().setAddDuration(300);
         mRecyclerView.getItemAnimator().setRemoveDuration(0);
+
+        // TODO
+        //mRecyclerView.addOnItemTouchListener(new );
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
