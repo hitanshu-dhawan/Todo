@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="test"
+        android:id="@+id/multi_select_done"
+        android:title="Done"
+        android:icon="@mipmap/ic_done_white_24dp"
         app:showAsAction="always"
         />
 

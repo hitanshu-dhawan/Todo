@@ -1,4 +1,4 @@
-package com.hitanshudhawan.todo.models;
+package com.hitanshudhawan.todo;
 
 import java.util.Calendar;
 

@@ -1,4 +1,4 @@
-package com.hitanshudhawan.todo.adapters;
+package com.hitanshudhawan.todo;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -10,9 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.hitanshudhawan.todo.R;
-import com.hitanshudhawan.todo.models.Todo;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

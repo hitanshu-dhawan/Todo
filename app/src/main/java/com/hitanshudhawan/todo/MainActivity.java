@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -25,18 +24,11 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.DateFormat;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
-import android.widget.Toast;
-
-import com.hitanshudhawan.todo.adapters.TodoListAdapter;
-import com.hitanshudhawan.todo.database.TodoDBHelper;
-import com.hitanshudhawan.todo.models.Todo;
-import com.hitanshudhawan.todo.utils.RecyclerItemClickListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,8 +50,7 @@ public class MainActivity extends AppCompatActivity {
     SearchView mSearchView;
     FloatingActionButton mFab;
 
-
-    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+    ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.menu_multi_select, menu);
@@ -73,7 +64,40 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            // TODO
+
+            switch(item.getItemId()) {
+
+                case R.id.multi_select_done:
+                    final ArrayList<Long> doneTodos = new ArrayList<>();
+                    for(int i=0; i < mSelectedTodos.size(); i++) {
+                        mTodos.remove(mSelectedTodos.get(i));
+                        updateTodoDoneIntoDB(mSelectedTodos.get(i).getId(), true);
+                        doneTodos.add(mSelectedTodos.get(i).getId());
+                    }
+                    mAdapter.notifyDataSetChanged();
+
+                    Snackbar doneSnackbar;
+                    if(mSelectedTodos.size() == 1)
+                        doneSnackbar = Snackbar.make(mRecyclerView, mSelectedTodos.size() + " todo done.",Snackbar.LENGTH_LONG);
+                    else
+                        doneSnackbar = Snackbar.make(mRecyclerView, mSelectedTodos.size() + " todos done.",Snackbar.LENGTH_LONG);
+                    doneSnackbar.setAction("Undo", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            for(int i=0; i < doneTodos.size(); i++) {
+                                updateTodoDoneIntoDB(doneTodos.get(i), false);
+                            }
+                            mTodos.clear();
+                            mTodos.addAll(fetchTodosFromDB());
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    doneSnackbar.show();
+
+                    mActionMode.finish();
+                    return true;
+            }
+
             return false;
         }
 
@@ -81,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
             isMultiSelect = false;
+            // TODO enable swipe
             mSelectedTodos.clear();
             mAdapter.notifyDataSetChanged();
         }
@@ -115,9 +140,8 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         mRecyclerView.setItemAnimator(new FadeInRightAnimator());
         mRecyclerView.getItemAnimator().setAddDuration(300);
-        mRecyclerView.getItemAnimator().setRemoveDuration(0);
+        mRecyclerView.getItemAnimator().setRemoveDuration(300);
 
-        // TODO
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -125,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     multiSelect(position);
                 }
                 else {
-                    // TODO
+                    // TODO show detail activity
                 }
             }
 
@@ -134,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
                 if(!isMultiSelect) {
                     mSelectedTodos.clear();
                     isMultiSelect = true;
+                    // TODO disable swipe when multiselect is on.
+
                     if(mActionMode == null) {
                         mActionMode = startSupportActionMode(mActionModeCallback);
                     }
@@ -278,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
                         Todo todo = new Todo(id, todoEditText.getText().toString(),Long.MIN_VALUE);
 
                         mTodos.add(0,todo);
-                        mAdapter.notifyDataSetChanged();
+                        mAdapter.notifyItemInserted(0);
 
                         // todo add in sorted order.
                         //
