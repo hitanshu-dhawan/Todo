@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     ArrayList<Todo> mTodos;
     TodoListAdapter mAdapter;
+
+    LinearLayout mEmptyView;
 
     ArrayList<Todo> mSelectedTodos;
     boolean isMultiSelect;
@@ -75,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                         doneTodos.add(mSelectedTodos.get(i).getId());
                     }
                     mAdapter.notifyDataSetChanged();
+                    checkIfRecyclerViewEmpty();
 
                     Snackbar doneSnackbar;
                     if(mSelectedTodos.size() == 1)
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                             mTodos.clear();
                             mTodos.addAll(fetchTodosFromDB());
                             mAdapter.notifyDataSetChanged();
+                            checkIfRecyclerViewEmpty();
                         }
                     });
                     doneSnackbar.show();
@@ -107,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             isMultiSelect = false;
             mSelectedTodos.clear();
             mAdapter.notifyDataSetChanged();
+            checkIfRecyclerViewEmpty();
         }
     };
 
@@ -120,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.todoRecyclerView);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mEmptyView = (LinearLayout) findViewById(R.id.empty_view);
 
         setTitle("Todos");
         initRecyclerView();
@@ -140,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setItemAnimator(new FadeInRightAnimator());
         mRecyclerView.getItemAnimator().setAddDuration(300);
         mRecyclerView.getItemAnimator().setRemoveDuration(300);
+
+        checkIfRecyclerViewEmpty();
 
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
@@ -191,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 final long id = mTodos.get(position).getId();
 
                 if (direction == ItemTouchHelper.RIGHT) {
-
+                    // Task Done.
                     mTodos.remove(position);
                     mAdapter.notifyItemRemoved(position);
                     updateTodoDoneIntoDB(id,true);
@@ -203,12 +212,21 @@ public class MainActivity extends AppCompatActivity {
                             mTodos.add(position,getTodofromIDfromDB(id));
                             mAdapter.notifyItemInserted(position);
                             updateTodoDoneIntoDB(id,false);
+                            checkIfRecyclerViewEmpty();
+                        }
+                    });
+                    doneSnackbar.addCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                            if(event == DISMISS_EVENT_CONSECUTIVE || event == DISMISS_EVENT_SWIPE || event == DISMISS_EVENT_TIMEOUT) {
+                                checkIfRecyclerViewEmpty();
+                            }
                         }
                     });
                     doneSnackbar.show();
                 }
                 else {
-
+                    // Change Date and Time.
                     final Calendar currentDateTime = Calendar.getInstance();
                     final Calendar todoDateTime = Calendar.getInstance();
                     DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
@@ -309,7 +327,8 @@ public class MainActivity extends AppCompatActivity {
                         Todo todo = new Todo(id, todoEditText.getText().toString(),Long.MIN_VALUE);
 
                         mTodos.add(0,todo);
-                        mAdapter.notifyItemInserted(0);
+                        mAdapter.notifyDataSetChanged();
+                        checkIfRecyclerViewEmpty();
 
                         // todo add in sorted order.
                         //
@@ -347,8 +366,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        // TODO hide fab when searching
-
         MenuItem searchMenuItem = menu.findItem(R.id.search_item);
         mSearchView = (SearchView) searchMenuItem.getActionView();
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -380,8 +397,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         return true;
     }
 
@@ -390,10 +405,21 @@ public class MainActivity extends AppCompatActivity {
 
         int id = item.getItemId();
         switch (id) {
-
+            // todo add menu items
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void checkIfRecyclerViewEmpty() {
+        if(mTodos.isEmpty()) {
+            mRecyclerView.setVisibility(View.GONE);
+            mEmptyView.setVisibility(View.VISIBLE);
+        }
+        else {
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mEmptyView.setVisibility(View.GONE);
+        }
     }
 
     private ArrayList<Todo> fetchTodosFromDB() {
