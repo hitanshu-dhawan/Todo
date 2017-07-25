@@ -105,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
             isMultiSelect = false;
-            // TODO enable swipe
             mSelectedTodos.clear();
             mAdapter.notifyDataSetChanged();
         }
@@ -158,8 +157,6 @@ public class MainActivity extends AppCompatActivity {
                 if(!isMultiSelect) {
                     mSelectedTodos.clear();
                     isMultiSelect = true;
-                    // TODO disable swipe when multiselect is on.
-
                     if(mActionMode == null) {
                         mActionMode = startSupportActionMode(mActionModeCallback);
                     }
@@ -236,6 +233,14 @@ public class MainActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
                 }
 
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                if(isMultiSelect)
+                    return false;
+                else
+                    return true;
             }
 
             @Override
