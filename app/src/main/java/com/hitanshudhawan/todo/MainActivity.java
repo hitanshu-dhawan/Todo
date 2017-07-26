@@ -11,7 +11,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -70,11 +69,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 
-            switch(item.getItemId()) {
+            switch (item.getItemId()) {
 
                 case R.id.multi_select_done:
                     final ArrayList<Long> doneTodos = new ArrayList<>();
-                    for(int i=0; i < mSelectedTodos.size(); i++) {
+                    for (int i = 0; i < mSelectedTodos.size(); i++) {
                         mTodos.remove(mSelectedTodos.get(i));
                         updateTodoDoneIntoDB(mSelectedTodos.get(i).getId(), true);
                         doneTodos.add(mSelectedTodos.get(i).getId());
@@ -83,14 +82,14 @@ public class MainActivity extends AppCompatActivity {
                     checkIfRecyclerViewEmpty();
 
                     Snackbar doneSnackbar;
-                    if(mSelectedTodos.size() == 1)
-                        doneSnackbar = Snackbar.make(mRecyclerView, mSelectedTodos.size() + " todo done.",Snackbar.LENGTH_LONG);
+                    if (mSelectedTodos.size() == 1)
+                        doneSnackbar = Snackbar.make(mRecyclerView, mSelectedTodos.size() + " todo done.", Snackbar.LENGTH_LONG);
                     else
-                        doneSnackbar = Snackbar.make(mRecyclerView, mSelectedTodos.size() + " todos done.",Snackbar.LENGTH_LONG);
+                        doneSnackbar = Snackbar.make(mRecyclerView, mSelectedTodos.size() + " todos done.", Snackbar.LENGTH_LONG);
                     doneSnackbar.setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            for(int i=0; i < doneTodos.size(); i++) {
+                            for (int i = 0; i < doneTodos.size(); i++) {
                                 updateTodoDoneIntoDB(doneTodos.get(i), false);
                             }
                             mTodos.clear();
@@ -155,21 +154,20 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(isMultiSelect) {
+                if (isMultiSelect) {
                     multiSelect(position);
-                }
-                else {
+                } else {
                     // TODO show detail activity
                 }
             }
 
             @Override
             public void onItemLongClick(View view, int position) {
-                if(!isMultiSelect) {
+                if (!isMultiSelect) {
                     view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                     mSelectedTodos.clear();
                     isMultiSelect = true;
-                    if(mActionMode == null) {
+                    if (mActionMode == null) {
                         mActionMode = startSupportActionMode(mActionModeCallback);
                     }
                 }
@@ -183,8 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mFab.show();
-                }
-                else {
+                } else {
                     mFab.hide();
                 }
             }
@@ -206,29 +203,28 @@ public class MainActivity extends AppCompatActivity {
                     // Task Done.
                     mTodos.remove(position);
                     mAdapter.notifyItemRemoved(position);
-                    updateTodoDoneIntoDB(id,true);
+                    updateTodoDoneIntoDB(id, true);
 
                     Snackbar doneSnackbar = Snackbar.make(viewHolder.itemView, "Todo Done.", Snackbar.LENGTH_LONG);
                     doneSnackbar.setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            mTodos.add(position,getTodofromIDfromDB(id));
+                            mTodos.add(position, getTodofromIDfromDB(id));
                             mAdapter.notifyItemInserted(position);
-                            updateTodoDoneIntoDB(id,false);
+                            updateTodoDoneIntoDB(id, false);
                             checkIfRecyclerViewEmpty();
                         }
                     });
                     doneSnackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar transientBottomBar, int event) {
-                            if(event == DISMISS_EVENT_CONSECUTIVE || event == DISMISS_EVENT_SWIPE || event == DISMISS_EVENT_TIMEOUT) {
+                            if (event == DISMISS_EVENT_CONSECUTIVE || event == DISMISS_EVENT_SWIPE || event == DISMISS_EVENT_TIMEOUT) {
                                 checkIfRecyclerViewEmpty();
                             }
                         }
                     });
                     doneSnackbar.show();
-                }
-                else {
+                } else {
                     // Change Date and Time.
                     final Calendar currentDateTime = Calendar.getInstance();
                     final Calendar todoDateTime = Calendar.getInstance();
@@ -238,16 +234,16 @@ public class MainActivity extends AppCompatActivity {
                             TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
                                 @Override
                                 public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
-                                    todoDateTime.set(year,month,dayOfMonth,hourOfDay,minute);
+                                    todoDateTime.set(year, month, dayOfMonth, hourOfDay, minute);
 
                                     mTodos.get(position).setDate(todoDateTime);
                                     mAdapter.notifyItemChanged(position);
-                                    changeTodoDateIntoDB(id,todoDateTime);
+                                    changeTodoDateIntoDB(id, todoDateTime);
                                 }
-                            },0,0,DateFormat.is24HourFormat(MainActivity.this));
+                            }, 0, 0, DateFormat.is24HourFormat(MainActivity.this));
                             timePickerDialog.show();
                         }
-                    },currentDateTime.get(Calendar.YEAR),currentDateTime.get(Calendar.MONTH),currentDateTime.get(Calendar.DAY_OF_MONTH));
+                    }, currentDateTime.get(Calendar.YEAR), currentDateTime.get(Calendar.MONTH), currentDateTime.get(Calendar.DAY_OF_MONTH));
                     datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
                     datePickerDialog.show();
 
@@ -258,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean isItemViewSwipeEnabled() {
-                if(isMultiSelect)
+                if (isMultiSelect)
                     return false;
                 else
                     return true;
@@ -285,7 +281,8 @@ public class MainActivity extends AppCompatActivity {
                         c.restore();
                     } else {
                         Paint p = new Paint();
-                        p.setColor(ContextCompat.getColor(MainActivity.this, R.color.colorTodoDateChange));                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
+                        p.setColor(ContextCompat.getColor(MainActivity.this, R.color.colorTodoDateChange));
+                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
                         c.drawRect(background, p);
                         c.clipRect(background);
                         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_date_range_white_48dp);
@@ -327,9 +324,9 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         long id = insertTodoIntoDB(todoEditText.getText().toString());
-                        Todo todo = new Todo(id, todoEditText.getText().toString(),Long.MIN_VALUE);
+                        Todo todo = new Todo(id, todoEditText.getText().toString(), Long.MIN_VALUE);
 
-                        mTodos.add(0,todo);
+                        mTodos.add(0, todo);
                         mAdapter.notifyDataSetChanged();
                         checkIfRecyclerViewEmpty();
 
@@ -348,15 +345,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void multiSelect(int position) {
-        if(mActionMode != null) {
-            if(mSelectedTodos.contains(mTodos.get(position)))
+        if (mActionMode != null) {
+            if (mSelectedTodos.contains(mTodos.get(position)))
                 mSelectedTodos.remove(mTodos.get(position));
             else
                 mSelectedTodos.add(mTodos.get(position));
 
-            if(mSelectedTodos.size() == 1)
+            if (mSelectedTodos.size() == 1)
                 mActionMode.setTitle(mSelectedTodos.size() + " todo selected");
-            else if(mSelectedTodos.size() > 1)
+            else if (mSelectedTodos.size() > 1)
                 mActionMode.setTitle(mSelectedTodos.size() + " todos selected");
             else
                 mActionMode.finish();
@@ -383,13 +380,13 @@ public class MainActivity extends AppCompatActivity {
                 mTodos.clear();
                 mTodos.addAll(fetchTodosFromDB());
 
-                if(newText.trim().isEmpty()) {
+                if (newText.trim().isEmpty()) {
                     mAdapter.notifyDataSetChanged();
                     return false;
                 }
 
-                for(int i=0; i < mTodos.size(); i++) {
-                    if(!mTodos.get(i).getTitle().toLowerCase().contains(newText.toLowerCase())) {
+                for (int i = 0; i < mTodos.size(); i++) {
+                    if (!mTodos.get(i).getTitle().toLowerCase().contains(newText.toLowerCase())) {
                         mTodos.remove(i);
                         i--;
                     }
@@ -415,11 +412,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIfRecyclerViewEmpty() {
-        if(mTodos.isEmpty()) {
+        if (mTodos.isEmpty()) {
             mRecyclerView.setVisibility(View.GONE);
             mEmptyView.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
         }
@@ -459,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase database = todoDBHelper.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        if(isDone)
+        if (isDone)
             contentValues.put(TodoDBHelper.TODO_DONE, TodoDBHelper.TRUE);
         else
             contentValues.put(TodoDBHelper.TODO_DONE, TodoDBHelper.FALSE);
