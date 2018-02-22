@@ -32,6 +32,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
+import com.hitanshudhawan.todo.database.TodoDBHelper;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -445,6 +447,7 @@ public class MainActivity extends AppCompatActivity {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TodoDBHelper.TODO_TITLE, title);
         contentValues.put(TodoDBHelper.TODO_DATE, Long.MIN_VALUE);
+        // 0
         contentValues.put(TodoDBHelper.TODO_DONE, TodoDBHelper.FALSE);
         return database.insert(TodoDBHelper.TABLE_NAME, null, contentValues);
     }
