@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
+import com.hitanshudhawan.todo.database.TodoContract;
 import com.hitanshudhawan.todo.database.TodoDBHelper;
 
 import java.util.ArrayList;
@@ -425,13 +426,14 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Todo> fetchTodosFromDB() {
         ArrayList<Todo> todoArrayList = new ArrayList<>();
-        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
-        SQLiteDatabase database = todoDBHelper.getReadableDatabase();
-        Cursor cursor = database.query(TodoDBHelper.TABLE_NAME, null, TodoDBHelper.TODO_DONE + " = " + TodoDBHelper.FALSE, null, null, null, TodoDBHelper._ID + " DESC");
+//        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
+//        SQLiteDatabase database = todoDBHelper.getReadableDatabase();
+//        Cursor cursor = database.query(TodoContract.TodoEntry.TABLE_NAME, null, TodoContract.TodoEntry.COLUMN_TODO_DONE + " = " + TodoContract.TodoEntry.TODO_NOT_DONE, null, null, null, TodoContract.TodoEntry._ID + " DESC");
+        Cursor cursor = getContentResolver().query(TodoContract.TodoEntry.CONTENT_URI,null,TodoContract.TodoEntry.COLUMN_TODO_DONE + " = " + TodoContract.TodoEntry.TODO_NOT_DONE,null, TodoContract.TodoEntry._ID + " DESC");
         while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex(TodoDBHelper._ID));
-            String todoTitle = cursor.getString(cursor.getColumnIndex(TodoDBHelper.TODO_TITLE));
-            long todoDateTime = cursor.getLong(cursor.getColumnIndex(TodoDBHelper.TODO_DATE));
+            long id = cursor.getLong(cursor.getColumnIndex(TodoContract.TodoEntry._ID));
+            String todoTitle = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_TITLE));
+            long todoDateTime = cursor.getLong(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME));
             Calendar todoDate = Calendar.getInstance();
             todoDate.setTimeInMillis(todoDateTime);
             todoArrayList.add(new Todo(id, todoTitle, todoDate));
@@ -445,11 +447,11 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase database = todoDBHelper.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoDBHelper.TODO_TITLE, title);
-        contentValues.put(TodoDBHelper.TODO_DATE, Long.MIN_VALUE);
+        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, title);
+        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, Long.MIN_VALUE);
         // 0
-        contentValues.put(TodoDBHelper.TODO_DONE, TodoDBHelper.FALSE);
-        return database.insert(TodoDBHelper.TABLE_NAME, null, contentValues);
+        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
+        return database.insert(TodoContract.TodoEntry.TABLE_NAME, null, contentValues);
     }
 
     private void updateTodoDoneIntoDB(long id, boolean isDone) {
@@ -459,11 +461,11 @@ public class MainActivity extends AppCompatActivity {
 
         ContentValues contentValues = new ContentValues();
         if (isDone)
-            contentValues.put(TodoDBHelper.TODO_DONE, TodoDBHelper.TRUE);
+            contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_DONE);
         else
-            contentValues.put(TodoDBHelper.TODO_DONE, TodoDBHelper.FALSE);
+            contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
 
-        database.update(TodoDBHelper.TABLE_NAME, contentValues, TodoDBHelper._ID + " = " + id, null);
+        database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, TodoContract.TodoEntry._ID + " = " + id, null);
     }
 
     private Todo getTodofromIDfromDB(long id) {
@@ -471,11 +473,11 @@ public class MainActivity extends AppCompatActivity {
         TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
         SQLiteDatabase database = todoDBHelper.getReadableDatabase();
 
-        Cursor cursor = database.query(TodoDBHelper.TABLE_NAME, null, TodoDBHelper._ID + " = " + id, null, null, null, null);
+        Cursor cursor = database.query(TodoContract.TodoEntry.TABLE_NAME, null, TodoContract.TodoEntry._ID + " = " + id, null, null, null, null);
         cursor.moveToFirst();
 
-        String todoTitle = cursor.getString(cursor.getColumnIndex(TodoDBHelper.TODO_TITLE));
-        Long dateTimeInMillis = cursor.getLong(cursor.getColumnIndex(TodoDBHelper.TODO_DATE));
+        String todoTitle = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_TITLE));
+        Long dateTimeInMillis = cursor.getLong(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME));
         Todo todo = new Todo(id, todoTitle, dateTimeInMillis);
 
         return todo;
@@ -487,9 +489,9 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase database = todoDBHelper.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoDBHelper.TODO_DATE, todoDateTime.getTimeInMillis());
+        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime.getTimeInMillis());
 
-        database.update(TodoDBHelper.TABLE_NAME, contentValues, TodoDBHelper._ID + " = " + id, null);
+        database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, TodoContract.TodoEntry._ID + " = " + id, null);
     }
 
 }
