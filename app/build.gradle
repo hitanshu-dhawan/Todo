@@ -30,7 +30,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:26.+'
     compile 'com.android.support:cardview-v7:26.+'
 
-    compile 'jp.wasabeef:recyclerview-animators:2.2.7'
-
     testCompile 'junit:junit:4.12'
 }

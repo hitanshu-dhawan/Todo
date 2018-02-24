@@ -2,6 +2,7 @@ package com.hitanshudhawan.todo;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -37,9 +39,6 @@ import com.hitanshudhawan.todo.database.TodoDBHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
-import jp.wasabeef.recyclerview.animators.FadeInRightAnimator;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -144,13 +143,8 @@ public class MainActivity extends AppCompatActivity {
         mActionMode = null;
 
         mAdapter = new TodoListAdapter(MainActivity.this, mTodos, mSelectedTodos);
-        SlideInBottomAnimationAdapter slideInBottomAnimationAdapter = new SlideInBottomAnimationAdapter(mAdapter);
-        slideInBottomAnimationAdapter.setDuration(300);
-        mRecyclerView.setAdapter(slideInBottomAnimationAdapter);
+        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        mRecyclerView.setItemAnimator(new FadeInRightAnimator());
-        mRecyclerView.getItemAnimator().setAddDuration(300);
-        mRecyclerView.getItemAnimator().setRemoveDuration(300);
 
         checkIfRecyclerViewEmpty();
 
@@ -443,21 +437,17 @@ public class MainActivity extends AppCompatActivity {
 
     private long insertTodoIntoDB(String title) {
 
-        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
-        SQLiteDatabase database = todoDBHelper.getWritableDatabase();
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, title);
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, Long.MIN_VALUE);
-        // 0
+        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, 0); //0
         contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
-        return database.insert(TodoContract.TodoEntry.TABLE_NAME, null, contentValues);
+
+        Uri uri = getContentResolver().insert(TodoContract.TodoEntry.CONTENT_URI,contentValues);
+
+        return ContentUris.parseId(uri);
     }
 
     private void updateTodoDoneIntoDB(long id, boolean isDone) {
-
-        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
-        SQLiteDatabase database = todoDBHelper.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
         if (isDone)
@@ -465,33 +455,27 @@ public class MainActivity extends AppCompatActivity {
         else
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
 
-        database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, TodoContract.TodoEntry._ID + " = " + id, null);
+        getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI,id),contentValues,null,null);
     }
 
     private Todo getTodofromIDfromDB(long id) {
 
-        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
-        SQLiteDatabase database = todoDBHelper.getReadableDatabase();
-
-        Cursor cursor = database.query(TodoContract.TodoEntry.TABLE_NAME, null, TodoContract.TodoEntry._ID + " = " + id, null, null, null, null);
+//        Cursor cursor = database.query(TodoContract.TodoEntry.TABLE_NAME, null, TodoContract.TodoEntry._ID + " = " + id, null, null, null, null);
+        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI,id),null,null,null,null);
         cursor.moveToFirst();
 
         String todoTitle = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_TITLE));
         Long dateTimeInMillis = cursor.getLong(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME));
-        Todo todo = new Todo(id, todoTitle, dateTimeInMillis);
 
-        return todo;
+        return new Todo(id, todoTitle, dateTimeInMillis);
     }
 
     private void changeTodoDateIntoDB(long id, Calendar todoDateTime) {
 
-        TodoDBHelper todoDBHelper = new TodoDBHelper(MainActivity.this);
-        SQLiteDatabase database = todoDBHelper.getWritableDatabase();
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime.getTimeInMillis());
 
-        database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, TodoContract.TodoEntry._ID + " = " + id, null);
+        getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI,id),contentValues,null,null);
     }
 
 }

@@ -81,12 +81,12 @@ public class TodoProvider extends ContentProvider {
         }
 
         Long todoDateTime = contentValues.getAsLong(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME);
-        if (todoDateTime < 0) {
+        if (todoDateTime == null || todoDateTime < 0) {
             throw new IllegalArgumentException();
         }
 
         Integer todoDone = contentValues.getAsInteger(TodoContract.TodoEntry.COLUMN_TODO_DONE);
-        if (todoDone != TodoContract.TodoEntry.TODO_NOT_DONE && todoDone != TodoContract.TodoEntry.TODO_DONE) {
+        if (todoDone == null || todoDone != TodoContract.TodoEntry.TODO_NOT_DONE && todoDone != TodoContract.TodoEntry.TODO_DONE) {
             throw new IllegalArgumentException();
         }
 
@@ -117,17 +117,17 @@ public class TodoProvider extends ContentProvider {
     private int updateTodo(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
 
         String todoTitle = contentValues.getAsString(TodoContract.TodoEntry.COLUMN_TODO_TITLE);
-        if (todoTitle == null || todoTitle.equals("")) {
+        if (todoTitle != null && todoTitle.equals("")) {
             throw new IllegalArgumentException();
         }
 
         Long todoDateTime = contentValues.getAsLong(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME);
-        if (todoDateTime < 0) {
+        if (todoDateTime != null && todoDateTime < 0) {
             throw new IllegalArgumentException();
         }
 
         Integer todoDone = contentValues.getAsInteger(TodoContract.TodoEntry.COLUMN_TODO_DONE);
-        if (todoDone != TodoContract.TodoEntry.TODO_NOT_DONE && todoDone != TodoContract.TodoEntry.TODO_DONE) {
+        if (todoDone != null && todoDone != TodoContract.TodoEntry.TODO_NOT_DONE && todoDone != TodoContract.TodoEntry.TODO_DONE) {
             throw new IllegalArgumentException();
         }
 
