@@ -5,7 +5,7 @@
     <color name="colorAccent">#D50000</color>
     
     <color name="colorTodoDone">#388E3C</color>
-    <color name="colorTodoDateChange">#FFA000</color>
+    <color name="colorTodoDateTimeChange">#FFA000</color>
     
     <color name="colorTodoSelected">#EEEEEE</color>
 </resources>

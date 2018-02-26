@@ -7,7 +7,6 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -59,6 +58,9 @@ public class TodoProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
+
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+
         return cursor;
     }
 
@@ -97,6 +99,9 @@ public class TodoProvider extends ContentProvider {
             Log.e("TAG", "Failed to insert row for " + uri);
             return null;
         }
+
+        getContext().getContentResolver().notifyChange(uri,null);
+
         return ContentUris.withAppendedId(uri, id);
     }
 
@@ -134,8 +139,12 @@ public class TodoProvider extends ContentProvider {
         if (contentValues.size() == 0) return 0;
 
         SQLiteDatabase database = mTodoDBHelper.getWritableDatabase();
+        int rowsUpdated = database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, selection, selectionArgs);
 
-        return database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        if (rowsUpdated != 0)
+            getContext().getContentResolver().notifyChange(uri,null);
+
+        return rowsUpdated;
     }
 
     @Override
@@ -143,16 +152,25 @@ public class TodoProvider extends ContentProvider {
 
         SQLiteDatabase database = mTodoDBHelper.getWritableDatabase();
 
+        int rowsDeleted;
+
         switch (sUriMatcher.match(uri)) {
             case TODOS:
-                return database.delete(TodoContract.TodoEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(TodoContract.TodoEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             case TODO_ID:
                 selection = TodoContract.TodoEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(TodoContract.TodoEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(TodoContract.TodoEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
+
+        if (rowsDeleted != 0)
+            getContext().getContentResolver().notifyChange(uri,null);
+
+        return rowsDeleted;
     }
 
     @Nullable
