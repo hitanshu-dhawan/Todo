@@ -30,7 +30,7 @@ public class TodoCursorAdapter extends RecyclerViewCursorAdapter<TodoCursorAdapt
     @Override
     public void onBindViewHolder(TodoViewHolder holder, Cursor cursor) {
         Todo todo = Todo.fromCursor(cursor);
-        holder.todoTitleTextView.setText(todo.getTitle());
+        holder.todoTitleTextView.setText(todo.getTitle().replace("\n"," "));
         holder.todoDateTimeTextView.setText(todo.getDateTime().getTimeInMillis()+"");
     }
 
