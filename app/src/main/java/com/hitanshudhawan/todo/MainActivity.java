@@ -24,6 +24,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.DateFormat;
@@ -34,6 +35,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.hitanshudhawan.todo.database.TodoContract;
 
@@ -211,6 +213,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.search_item).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // What to do ? for Search.
+                return true;
+            }
+        });
         return true;
     }
 
@@ -262,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         String[] projection = {
                 TodoContract.TodoEntry._ID,
                 TodoContract.TodoEntry.COLUMN_TODO_TITLE,
