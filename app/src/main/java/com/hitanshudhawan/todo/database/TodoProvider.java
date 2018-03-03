@@ -59,7 +59,7 @@ public class TodoProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
 
-        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;
     }
@@ -100,7 +100,7 @@ public class TodoProvider extends ContentProvider {
             return null;
         }
 
-        getContext().getContentResolver().notifyChange(uri,null);
+        getContext().getContentResolver().notifyChange(uri, null);
 
         return ContentUris.withAppendedId(uri, id);
     }
@@ -142,7 +142,7 @@ public class TodoProvider extends ContentProvider {
         int rowsUpdated = database.update(TodoContract.TodoEntry.TABLE_NAME, contentValues, selection, selectionArgs);
 
         if (rowsUpdated != 0)
-            getContext().getContentResolver().notifyChange(uri,null);
+            getContext().getContentResolver().notifyChange(uri, null);
 
         return rowsUpdated;
     }
@@ -168,7 +168,7 @@ public class TodoProvider extends ContentProvider {
         }
 
         if (rowsDeleted != 0)
-            getContext().getContentResolver().notifyChange(uri,null);
+            getContext().getContentResolver().notifyChange(uri, null);
 
         return rowsDeleted;
     }

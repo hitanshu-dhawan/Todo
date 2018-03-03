@@ -3,7 +3,6 @@ package com.hitanshudhawan.todo.activities;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.appwidget.AppWidgetManager;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
@@ -105,8 +104,8 @@ public class TodoAddActivity extends AppCompatActivity {
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, todoTitle);
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime == null ? 0 : todoDateTime.getTimeInMillis());
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
-            getContentResolver().insert(TodoContract.TodoEntry.CONTENT_URI,contentValues);
-            sendBroadcast(new Intent(TodoAddActivity.this,TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+            getContentResolver().insert(TodoContract.TodoEntry.CONTENT_URI, contentValues);
+            sendBroadcast(new Intent(TodoAddActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
             Toast.makeText(TodoAddActivity.this, "Todo added", Toast.LENGTH_SHORT).show();
         }
         finishAndRemoveTask();

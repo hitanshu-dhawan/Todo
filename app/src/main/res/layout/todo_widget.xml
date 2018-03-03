@@ -19,7 +19,7 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:padding="16dp"/>
+            android:padding="16dp" />
 
         <ImageButton
             android:id="@+id/todo_add_button_widget"
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:src="@mipmap/ic_add_white_24dp"
-            android:padding="16dp"/>
+            android:padding="16dp" />
 
     </LinearLayout>
 

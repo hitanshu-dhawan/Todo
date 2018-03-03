@@ -10,6 +10,6 @@ import android.widget.RemoteViewsService;
 public class TodoWidgetService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new TodoViewsFactory(getApplicationContext(),intent);
+        return new TodoViewsFactory(getApplicationContext(), intent);
     }
 }

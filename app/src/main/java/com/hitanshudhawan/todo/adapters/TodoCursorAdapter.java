@@ -12,9 +12,9 @@ import android.widget.TextView;
 
 import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.activities.TodoDetailsActivity;
+import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.utils.Constant;
 import com.hitanshudhawan.todo.utils.RecyclerViewCursorAdapter;
-import com.hitanshudhawan.todo.database.Todo;
 
 /**
  * Created by hitanshu on 17/7/17.
@@ -42,7 +42,7 @@ public class TodoCursorAdapter extends RecyclerViewCursorAdapter<TodoCursorAdapt
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, TodoDetailsActivity.class);
-                intent.putExtra(Constant.TODO_ID,todo.getId());
+                intent.putExtra(Constant.TODO_ID, todo.getId());
                 context.startActivity(intent);
             }
         });
