@@ -1,4 +1,4 @@
-package com.hitanshudhawan.todo;
+package com.hitanshudhawan.todo.utils;
 
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;

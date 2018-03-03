@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/todo_date_time_item_todo_details"
+        android:icon="@mipmap/ic_date_range_white_24dp"
+        android:title="Date Time"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/todo_done_item_todo_add"
+        android:icon="@mipmap/ic_done_white_24dp"
+        android:title="Done"
+        app:showAsAction="always" />
+
+</menu>

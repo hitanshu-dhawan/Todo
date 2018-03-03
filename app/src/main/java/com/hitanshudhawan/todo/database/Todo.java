@@ -49,6 +49,7 @@ public class Todo {
 
     public static Todo fromCursor(Cursor cursor) {
         Todo todo = new Todo();
+        todo.setId(cursor.getLong(cursor.getColumnIndex(TodoContract.TodoEntry._ID)));
         todo.setTitle(cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_TITLE)));
         Calendar dateTime = Calendar.getInstance();
         dateTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME)));

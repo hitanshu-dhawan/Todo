@@ -1,10 +1,11 @@
-package com.hitanshudhawan.todo;
+package com.hitanshudhawan.todo.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,7 +13,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,7 +20,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,12 +31,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
+import com.hitanshudhawan.todo.R;
+import com.hitanshudhawan.todo.adapters.TodoCursorAdapter;
 import com.hitanshudhawan.todo.database.TodoContract;
+import com.hitanshudhawan.todo.widget.TodoWidget;
 
 import java.util.Calendar;
 
@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setTitle("Todos");
-
         initFab();
         initRecyclerView();
     }
@@ -68,25 +66,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                alertDialogBuilder.setTitle("Add Todo");
-                View dialogView = getLayoutInflater().inflate(R.layout.todo_add_dialog_box, null);
-                final EditText todoEditText = (EditText) dialogView.findViewById(R.id.todo_edit_text_dialog_box);
-                alertDialogBuilder.setView(dialogView);
-                alertDialogBuilder.setPositiveButton("Done", null);
-                final AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (todoEditText.getText().toString().trim().isEmpty()) {
-                            todoEditText.setError("Todo cannot be empty.");
-                            return;
-                        }
-                        insertTodo(todoEditText.getText().toString().trim());
-                        alertDialog.dismiss();
-                    }
-                });
+                startActivity(new Intent(MainActivity.this, TodoAddActivity.class));
             }
         });
     }
@@ -125,12 +105,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 if (direction == ItemTouchHelper.RIGHT) {
                     // Todo Done.
-                    updateTodo(id, TodoContract.TodoEntry.TODO_DONE);
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_DONE);
+                    getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
+                    sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                     Snackbar doneSnackbar = Snackbar.make(viewHolder.itemView, "Todo Done.", Snackbar.LENGTH_LONG);
                     doneSnackbar.setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            updateTodo(id, TodoContract.TodoEntry.TODO_NOT_DONE);
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
+                            getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
+                            sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                         }
                     });
                     doneSnackbar.show();
@@ -161,7 +147,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                     todoDateTime.set(Calendar.YEAR, year);
                                     todoDateTime.set(Calendar.MONTH, month);
                                     todoDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                                    updateTodo(id, todoDateTime);
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime.getTimeInMillis());
+                                    getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
+                                    sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                                 }
                             }, year, month, dayOfMonth);
                             Calendar minDateTime = Calendar.getInstance();
@@ -214,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.search_item).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.search_item_main).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -234,47 +223,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.about_item:
+            case R.id.about_item_main:
                 break;
         }
-        return true;
-    }
-
-
-    private Uri insertTodo(String todoTitle) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, todoTitle);
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, 0);
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
-        return getContentResolver().insert(TodoContract.TodoEntry.CONTENT_URI, contentValues);
-    }
-
-    private Uri insertTodo(String todoTitle, Calendar dateTime, Integer isDone) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, todoTitle);
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, dateTime.getTimeInMillis());
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, isDone);
-        return getContentResolver().insert(TodoContract.TodoEntry.CONTENT_URI, contentValues);
-    }
-
-    private int updateTodo(Long id, Integer isDone) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, isDone);
-        return getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
-    }
-
-    private int updateTodo(Long id, Calendar dateTime) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, dateTime.getTimeInMillis());
-        return getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
-    }
-
-    private int updateTodo(Long id, String todoTitle, Calendar dateTime, Integer isDone) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, todoTitle);
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, dateTime.getTimeInMillis());
-        contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, isDone);
-        return getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

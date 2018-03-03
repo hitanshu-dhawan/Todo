@@ -6,33 +6,32 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.hitanshudhawan.todo.MainActivity"
+    tools:context="com.hitanshudhawan.todo.activities.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/todo_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </android.support.v7.widget.RecyclerView>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/empty_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
-        android:visibility="visible">
+        android:orientation="vertical">
 
         <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:src="@mipmap/ic_done_all_black_48dp"
-            android:tint="@android:color/darker_gray"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:tint="@android:color/darker_gray" />
+
         <TextView
-            android:text="Great! All todos done."
-            android:textColor="@android:color/darker_gray"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="Great! All todos done."
+            android:textColor="@android:color/darker_gray" />
 
     </LinearLayout>
 

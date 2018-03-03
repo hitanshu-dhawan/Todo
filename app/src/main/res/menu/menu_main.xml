@@ -1,17 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.hitanshudhawan.todo.MainActivity">
+    tools:context="com.hitanshudhawan.todo.activities.MainActivity">
 
     <item
-        android:id="@+id/search_item"
+        android:id="@+id/search_item_main"
         android:icon="@mipmap/ic_search_white_24dp"
         android:title="Search"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
 
     <item
-        android:id="@+id/about_item"
+        android:id="@+id/about_item_main"
         android:title="About" />
 
 </menu>
