@@ -21,6 +21,7 @@ import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.database.TodoContract;
 import com.hitanshudhawan.todo.widget.TodoWidget;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class TodoAddActivity extends AppCompatActivity {
@@ -82,6 +83,7 @@ public class TodoAddActivity extends AppCompatActivity {
                                 todoDateTime.set(Calendar.YEAR, year);
                                 todoDateTime.set(Calendar.MONTH, month);
                                 todoDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                todoDateTimeTextView.setText(DateFormat.is24HourFormat(TodoAddActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todoDateTime.getTime()));
                             }
                         }, year, month, dayOfMonth);
                         Calendar minDateTime = Calendar.getInstance();

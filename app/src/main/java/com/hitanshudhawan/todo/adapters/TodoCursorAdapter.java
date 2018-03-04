@@ -40,7 +40,7 @@ public class TodoCursorAdapter extends RecyclerViewCursorAdapter<TodoCursorAdapt
     public void onBindViewHolder(TodoViewHolder holder, Cursor cursor) {
         final Todo todo = Todo.fromCursor(cursor);
         holder.todoTitleTextView.setText(todo.getTitle().replace("\n", " "));
-        holder.todoDateTimeTextView.setText(DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));
+        holder.todoDateTimeTextView.setText(todo.getDateTime().getTimeInMillis() == 0 ? "" : DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));
         holder.todoLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

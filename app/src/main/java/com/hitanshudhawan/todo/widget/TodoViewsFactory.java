@@ -73,7 +73,7 @@ public class TodoViewsFactory implements RemoteViewsService.RemoteViewsFactory {
         cursor.moveToPosition(position);
         Todo todo = Todo.fromCursor(cursor);
         rv.setTextViewText(R.id.todo_title_text_view_item_widget, todo.getTitle().replace("\n", " "));
-        rv.setTextViewText(R.id.todo_date_time_text_view_item_widget, DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));
+        rv.setTextViewText(R.id.todo_date_time_text_view_item_widget, todo.getDateTime().getTimeInMillis() == 0 ? "" : DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));
         rv.setOnClickFillInIntent(R.id.todo_layout_item_widget, new Intent().putExtra(Constant.TODO_ID, todo.getId()));
         return rv;
     }

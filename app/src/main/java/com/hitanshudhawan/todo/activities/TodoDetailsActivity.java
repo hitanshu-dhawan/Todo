@@ -27,6 +27,7 @@ import com.hitanshudhawan.todo.database.TodoContract;
 import com.hitanshudhawan.todo.utils.Constant;
 import com.hitanshudhawan.todo.widget.TodoWidget;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class TodoDetailsActivity extends AppCompatActivity {
@@ -38,6 +39,7 @@ public class TodoDetailsActivity extends AppCompatActivity {
     private Todo todo;
     private String todoTitle;
     private Calendar todoDateTime;
+    private Boolean dateTimeChanged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +60,11 @@ public class TodoDetailsActivity extends AppCompatActivity {
         todo = Todo.fromCursor(cursor);
         todoTitle = todo.getTitle();
         todoDateTime = todo.getDateTime();
+        dateTimeChanged = false;
 
         todoEditText.setText(todoTitle);
+
+        todoDateTimeTextView.setText(todoDateTime.getTimeInMillis() == 0 ? "" : DateFormat.is24HourFormat(TodoDetailsActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todoDateTime.getTime()));
     }
 
     @Override
@@ -101,6 +106,8 @@ public class TodoDetailsActivity extends AppCompatActivity {
                                 todoDateTime.set(Calendar.YEAR, year);
                                 todoDateTime.set(Calendar.MONTH, month);
                                 todoDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                todoDateTimeTextView.setText(DateFormat.is24HourFormat(TodoDetailsActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todoDateTime.getTime()));
+                                dateTimeChanged = true;
                             }
                         }, year, month, dayOfMonth);
                         Calendar minDateTime = Calendar.getInstance();
@@ -144,7 +151,8 @@ public class TodoDetailsActivity extends AppCompatActivity {
         if (!todoTitle.equals("")) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, todoTitle);
-            contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime == null ? 0 : todoDateTime.getTimeInMillis());
+            if (dateTimeChanged)
+                contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime == null ? 0 : todoDateTime.getTimeInMillis());
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
             getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, todoId), contentValues, null, null);
             sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
