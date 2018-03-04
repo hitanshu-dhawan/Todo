@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Binder;
+import android.text.format.DateFormat;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -11,6 +12,8 @@ import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.database.TodoContract;
 import com.hitanshudhawan.todo.utils.Constant;
+
+import java.text.SimpleDateFormat;
 
 /**
  * Created by hitanshu on 2/3/18.
@@ -70,7 +73,7 @@ public class TodoViewsFactory implements RemoteViewsService.RemoteViewsFactory {
         cursor.moveToPosition(position);
         Todo todo = Todo.fromCursor(cursor);
         rv.setTextViewText(R.id.todo_title_text_view_item_widget, todo.getTitle().replace("\n", " "));
-        rv.setTextViewText(R.id.todo_date_time_text_view_item_widget, todo.getDateTime().getTimeInMillis() + "");
+        rv.setTextViewText(R.id.todo_date_time_text_view_item_widget, DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));
         rv.setOnClickFillInIntent(R.id.todo_layout_item_widget, new Intent().putExtra(Constant.TODO_ID, todo.getId()));
         return rv;
     }

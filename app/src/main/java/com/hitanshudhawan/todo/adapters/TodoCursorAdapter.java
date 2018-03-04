@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import com.hitanshudhawan.todo.activities.TodoDetailsActivity;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.utils.Constant;
 import com.hitanshudhawan.todo.utils.RecyclerViewCursorAdapter;
+
+import java.text.SimpleDateFormat;
 
 /**
  * Created by hitanshu on 17/7/17.
@@ -37,7 +40,7 @@ public class TodoCursorAdapter extends RecyclerViewCursorAdapter<TodoCursorAdapt
     public void onBindViewHolder(TodoViewHolder holder, Cursor cursor) {
         final Todo todo = Todo.fromCursor(cursor);
         holder.todoTitleTextView.setText(todo.getTitle().replace("\n", " "));
-        holder.todoDateTimeTextView.setText(todo.getDateTime().getTimeInMillis() + "");
+        holder.todoDateTimeTextView.setText(DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));
         holder.todoLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
