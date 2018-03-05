@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
-        android:icon="@mipmap/ic_add_black_24dp"
+        android:icon="@mipmap/ic_add_shortcut"
+        android:background="#fff"
         android:shortcutId="id"
         android:shortcutShortLabel="@string/add_todo">
         <intent
