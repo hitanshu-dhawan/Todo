@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:icon="@mipmap/ic_add_black_24dp"
+        android:shortcutId="id"
+        android:shortcutShortLabel="@string/add_todo">
+        <intent
+            android:action="com.hitanshudhawan.todo"
+            android:targetClass="com.hitanshudhawan.todo.activities.TodoAddActivity"
+            android:targetPackage="com.hitanshudhawan.todo" />
+    </shortcut>
+</shortcuts>
