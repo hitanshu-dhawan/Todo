@@ -1,10 +1,13 @@
 package com.hitanshudhawan.todo.activities;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -36,6 +39,8 @@ import android.widget.TimePicker;
 
 import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.adapters.TodoCursorAdapter;
+import com.hitanshudhawan.todo.broadcastreceivers.AlarmReceiver;
+import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.database.TodoContract;
 import com.hitanshudhawan.todo.widget.TodoWidget;
 
@@ -151,6 +156,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                     contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime.getTimeInMillis());
                                     getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
                                     sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+                                    // Notification
+                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                                    cursor.moveToFirst();
+                                    String body = Todo.fromCursor(cursor).getTitle();
+                                    Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                                    intent.putExtra("id",id);
+                                    intent.putExtra("body", body);
+                                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this,(int)id,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+                                    alarmManager.set(AlarmManager.RTC_WAKEUP,todoDateTime.getTimeInMillis(),pendingIntent);
                                 }
                             }, year, month, dayOfMonth);
                             Calendar minDateTime = Calendar.getInstance();

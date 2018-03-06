@@ -1,7 +1,9 @@
 package com.hitanshudhawan.todo.activities;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
@@ -22,6 +24,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.hitanshudhawan.todo.R;
+import com.hitanshudhawan.todo.broadcastreceivers.AlarmReceiver;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.database.TodoContract;
 import com.hitanshudhawan.todo.utils.Constant;
@@ -32,14 +35,14 @@ import java.util.Calendar;
 
 public class TodoDetailsActivity extends AppCompatActivity {
 
-    private EditText todoEditText;
-    private TextView todoDateTimeTextView;
+    private EditText mTodoEditText;
+    private TextView mTodoDateTimeTextView;
 
-    private Long todoId;
-    private Todo todo;
-    private String todoTitle;
-    private Calendar todoDateTime;
-    private Boolean dateTimeChanged;
+    private Long mTodoId;
+    private Todo mTodo;
+    private String mTodoTitle;
+    private Calendar mTodoDateTime;
+    private Boolean mDateTimeChanged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,22 +52,22 @@ public class TodoDetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        todoEditText = (EditText) findViewById(R.id.todo_edit_text_todo_details);
-        todoDateTimeTextView = (TextView) findViewById(R.id.todo_date_time_text_view_todo_details);
+        mTodoEditText = (EditText) findViewById(R.id.todo_edit_text_todo_details);
+        mTodoDateTimeTextView = (TextView) findViewById(R.id.todo_date_time_text_view_todo_details);
 
-        todoId = getIntent().getLongExtra(Constant.TODO_ID, -1);
-        if (todoId == -1)
+        mTodoId = getIntent().getLongExtra(Constant.TODO_ID, -1);
+        if (mTodoId == -1)
             finishAndRemoveTask();
-        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, todoId), null, null, null, null);
+        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
         cursor.moveToFirst();
-        todo = Todo.fromCursor(cursor);
-        todoTitle = todo.getTitle();
-        todoDateTime = todo.getDateTime();
-        dateTimeChanged = false;
+        mTodo = Todo.fromCursor(cursor);
+        mTodoTitle = mTodo.getTitle();
+        mTodoDateTime = mTodo.getDateTime();
+        mDateTimeChanged = false;
 
-        todoEditText.setText(todoTitle);
+        mTodoEditText.setText(mTodoTitle);
 
-        todoDateTimeTextView.setText(todoDateTime.getTimeInMillis() == 0 ? "" : DateFormat.is24HourFormat(TodoDetailsActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todoDateTime.getTime()));
+        mTodoDateTimeTextView.setText(mTodoDateTime.getTimeInMillis() == 0 ? "" : DateFormat.is24HourFormat(TodoDetailsActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(mTodoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(mTodoDateTime.getTime()));
     }
 
     @Override
@@ -82,14 +85,14 @@ public class TodoDetailsActivity extends AppCompatActivity {
                 break;
             case R.id.todo_date_time_item_todo_details:
                 final Calendar currentDateTime = Calendar.getInstance();
-                // todoDateTime = Calendar.getInstance();
+                // mTodoDateTime = Calendar.getInstance();
                 TimePickerDialog timePickerDialog = new TimePickerDialog(TodoDetailsActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
-                        todoDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        todoDateTime.set(Calendar.MINUTE, minute);
+                        mTodoDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        mTodoDateTime.set(Calendar.MINUTE, minute);
                         int year, month, dayOfMonth;
-                        if (todoDateTime.get(Calendar.HOUR_OF_DAY) * 60 + todoDateTime.get(Calendar.MINUTE) < currentDateTime.get(Calendar.HOUR_OF_DAY) * 60 + currentDateTime.get(Calendar.MINUTE)) {
+                        if (mTodoDateTime.get(Calendar.HOUR_OF_DAY) * 60 + mTodoDateTime.get(Calendar.MINUTE) < currentDateTime.get(Calendar.HOUR_OF_DAY) * 60 + currentDateTime.get(Calendar.MINUTE)) {
                             currentDateTime.add(Calendar.DATE, 1);
                             year = currentDateTime.get(Calendar.YEAR);
                             month = currentDateTime.get(Calendar.MONTH);
@@ -103,11 +106,11 @@ public class TodoDetailsActivity extends AppCompatActivity {
                         DatePickerDialog datePickerDialog = new DatePickerDialog(TodoDetailsActivity.this, new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
-                                todoDateTime.set(Calendar.YEAR, year);
-                                todoDateTime.set(Calendar.MONTH, month);
-                                todoDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                                todoDateTimeTextView.setText(DateFormat.is24HourFormat(TodoDetailsActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todoDateTime.getTime()));
-                                dateTimeChanged = true;
+                                mTodoDateTime.set(Calendar.YEAR, year);
+                                mTodoDateTime.set(Calendar.MONTH, month);
+                                mTodoDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                mTodoDateTimeTextView.setText(DateFormat.is24HourFormat(TodoDetailsActivity.this) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(mTodoDateTime.getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(mTodoDateTime.getTime()));
+                                mDateTimeChanged = true;
                             }
                         }, year, month, dayOfMonth);
                         Calendar minDateTime = Calendar.getInstance();
@@ -132,7 +135,7 @@ public class TodoDetailsActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int which) {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_DONE);
-                        getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, todoId), contentValues, null, null);
+                        getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), contentValues, null, null);
                         sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                         Toast.makeText(TodoDetailsActivity.this, "Todo Done.", Toast.LENGTH_SHORT).show();
                         finishAndRemoveTask();
@@ -147,15 +150,27 @@ public class TodoDetailsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        todoTitle = todoEditText.getText().toString().trim();
-        if (!todoTitle.equals("")) {
+        mTodoTitle = mTodoEditText.getText().toString().trim();
+        if (!mTodoTitle.equals("")) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, todoTitle);
-            if (dateTimeChanged)
-                contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime == null ? 0 : todoDateTime.getTimeInMillis());
+            contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, mTodoTitle);
+            if (mDateTimeChanged)
+                contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, mTodoDateTime == null ? 0 : mTodoDateTime.getTimeInMillis());
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
-            getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, todoId), contentValues, null, null);
+            getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), contentValues, null, null);
             sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+            // Notification
+            if (mDateTimeChanged && mTodoDateTime != null) {
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
+                cursor.moveToFirst();
+                String body = Todo.fromCursor(cursor).getTitle();
+                Intent intent = new Intent(TodoDetailsActivity.this, AlarmReceiver.class);
+                intent.putExtra("id", mTodoId);
+                intent.putExtra("body", body);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoDetailsActivity.this, mTodoId.intValue(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
+            }
         }
         finishAndRemoveTask();
     }
