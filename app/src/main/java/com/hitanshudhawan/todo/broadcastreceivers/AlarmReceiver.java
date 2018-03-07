@@ -22,8 +22,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         String title = "Todo Pending...";
         String body = intent.getStringExtra("body");
         Intent activityIntent = new Intent(context, TodoDetailsActivity.class);
-        activityIntent.putExtra(Constant.TODO_ID,id);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, (int)id, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationHelper.notify((int)id, title, body, pendingIntent);
+        activityIntent.putExtra(Constant.TODO_ID, id);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, (int) id, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationHelper.notify((int) id, title, body, pendingIntent);
     }
 }

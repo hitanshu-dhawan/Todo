@@ -7,7 +7,6 @@ import android.app.TimePickerDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -115,6 +114,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
                     sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                     Snackbar doneSnackbar = Snackbar.make(viewHolder.itemView, "Todo Done.", Snackbar.LENGTH_LONG);
+                    // Notification
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                    cursor.moveToFirst();
+                    String body = Todo.fromCursor(cursor).getTitle();
+                    Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                    intent.putExtra("id", id);
+                    intent.putExtra("body", body);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    alarmManager.cancel(pendingIntent);
                     doneSnackbar.setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -122,6 +131,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
                             getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
                             sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+                            // Notification
+                            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                            Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                            cursor.moveToFirst();
+                            String body = Todo.fromCursor(cursor).getTitle();
+                            Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                            intent.putExtra("id", id);
+                            intent.putExtra("body", body);
+                            PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0)
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, Todo.fromCursor(cursor).getDateTime().getTimeInMillis(), pendingIntent);
                         }
                     });
                     doneSnackbar.show();
@@ -162,10 +182,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                     cursor.moveToFirst();
                                     String body = Todo.fromCursor(cursor).getTitle();
                                     Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                                    intent.putExtra("id",id);
+                                    intent.putExtra("id", id);
                                     intent.putExtra("body", body);
-                                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this,(int)id,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-                                    alarmManager.set(AlarmManager.RTC_WAKEUP,todoDateTime.getTimeInMillis(),pendingIntent);
+                                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                    alarmManager.set(AlarmManager.RTC_WAKEUP, todoDateTime.getTimeInMillis(), pendingIntent);
                                 }
                             }, year, month, dayOfMonth);
                             Calendar minDateTime = Calendar.getInstance();

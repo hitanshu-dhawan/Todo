@@ -138,6 +138,17 @@ public class TodoDetailsActivity extends AppCompatActivity {
                         getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), contentValues, null, null);
                         sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                         Toast.makeText(TodoDetailsActivity.this, "Todo Done.", Toast.LENGTH_SHORT).show();
+                        // Notification
+                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
+                        cursor.moveToFirst();
+                        String body = Todo.fromCursor(cursor).getTitle();
+                        Intent intent = new Intent(TodoDetailsActivity.this, AlarmReceiver.class);
+                        intent.putExtra("id", mTodoId);
+                        intent.putExtra("body", body);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoDetailsActivity.this, mTodoId.intValue(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0)
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, Todo.fromCursor(cursor).getDateTime().getTimeInMillis(), pendingIntent);
                         finishAndRemoveTask();
                     }
                 });
@@ -160,7 +171,7 @@ public class TodoDetailsActivity extends AppCompatActivity {
             getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), contentValues, null, null);
             sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
             // Notification
-            if (mDateTimeChanged && mTodoDateTime != null) {
+            if (mTodoDateTime != null) {
                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                 Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
                 cursor.moveToFirst();
