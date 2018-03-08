@@ -15,7 +15,7 @@ import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.activities.TodoDetailsActivity;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.utils.Constant;
-import com.hitanshudhawan.todo.utils.RecyclerViewCursorAdapter;
+import com.hitanshudhawan.todo.utils.CursorRecyclerAdapter;
 
 import java.text.SimpleDateFormat;
 
@@ -23,11 +23,12 @@ import java.text.SimpleDateFormat;
  * Created by hitanshu on 17/7/17.
  */
 
-public class TodoCursorAdapter extends RecyclerViewCursorAdapter<TodoCursorAdapter.TodoViewHolder> {
+public class TodoCursorAdapter extends CursorRecyclerAdapter<TodoCursorAdapter.TodoViewHolder> {
 
-    Context context;
+    private Context context;
 
     public TodoCursorAdapter(Context context) {
+        super(null);
         this.context = context;
     }
 
@@ -37,7 +38,7 @@ public class TodoCursorAdapter extends RecyclerViewCursorAdapter<TodoCursorAdapt
     }
 
     @Override
-    public void onBindViewHolder(TodoViewHolder holder, Cursor cursor) {
+    public void onBindViewHolderCursor(TodoViewHolder holder, Cursor cursor) {
         final Todo todo = Todo.fromCursor(cursor);
         holder.todoTitleTextView.setText(todo.getTitle().replace("\n", " "));
         holder.todoDateTimeTextView.setText(todo.getDateTime().getTimeInMillis() == 0 ? "" : DateFormat.is24HourFormat(context) ? new SimpleDateFormat("MMMM dd, yyyy  h:mm").format(todo.getDateTime().getTime()) : new SimpleDateFormat("MMMM dd, yyyy  h:mm a").format(todo.getDateTime().getTime()));

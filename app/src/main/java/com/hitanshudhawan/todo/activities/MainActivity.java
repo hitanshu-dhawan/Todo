@@ -29,12 +29,15 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.FilterQueryProvider;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.adapters.TodoCursorAdapter;
@@ -48,11 +51,11 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    RecyclerView mTodoRecyclerView;
-    TodoCursorAdapter mTodoCursorAdapter;
-    LinearLayout mEmptyView;
+    private RecyclerView mTodoRecyclerView;
+    private TodoCursorAdapter mTodoCursorAdapter;
+    private LinearLayout mEmptyView;
 
-    FloatingActionButton mFab;
+    private FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mTodoRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
         // mTodoRecyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this,DividerItemDecoration.VERTICAL));
         mEmptyView = (LinearLayout) findViewById(R.id.empty_view);
+        mTodoCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                return getContentResolver().query(TodoContract.TodoEntry.CONTENT_URI,
+                        null,
+                        TodoContract.TodoEntry.COLUMN_TODO_DONE + " = " + TodoContract.TodoEntry.TODO_NOT_DONE + " AND " + TodoContract.TodoEntry.COLUMN_TODO_TITLE + " LIKE " + "'%" + charSequence + "%'",
+                        null,
+                        null);
+            }
+        });
         getSupportLoaderManager().initLoader(0, null, MainActivity.this);
 
         mTodoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -247,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // What to do ? for Search.
+                mTodoCursorAdapter.getFilter().filter(newText);
                 return true;
             }
         });
@@ -266,14 +279,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        String[] projection = {
-                TodoContract.TodoEntry._ID,
-                TodoContract.TodoEntry.COLUMN_TODO_TITLE,
-                TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME,
-                TodoContract.TodoEntry.COLUMN_TODO_DONE};
         return new CursorLoader(MainActivity.this,
                 TodoContract.TodoEntry.CONTENT_URI,
-                projection,
+                null,
                 TodoContract.TodoEntry.COLUMN_TODO_DONE + " = " + TodoContract.TodoEntry.TODO_NOT_DONE,
                 null,
                 null);
