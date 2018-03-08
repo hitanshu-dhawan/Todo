@@ -29,7 +29,6 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,7 +36,6 @@ import android.widget.DatePicker;
 import android.widget.FilterQueryProvider;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.adapters.TodoCursorAdapter;
@@ -118,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
 
-                final long id = viewHolder.getItemId();
+                final long id = mTodoCursorAdapter.getItemId(viewHolder.getAdapterPosition());
 
                 if (direction == ItemTouchHelper.RIGHT) {
                     // Todo Done.
@@ -153,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                             intent.putExtra("id", id);
                             intent.putExtra("body", body);
                             PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                            if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0)
+                            if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0 && Todo.fromCursor(cursor).getDateTime().getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
                                 alarmManager.set(AlarmManager.RTC_WAKEUP, Todo.fromCursor(cursor).getDateTime().getTimeInMillis(), pendingIntent);
                         }
                     });
@@ -198,7 +196,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                     intent.putExtra("id", id);
                                     intent.putExtra("body", body);
                                     PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                    alarmManager.set(AlarmManager.RTC_WAKEUP, todoDateTime.getTimeInMillis(), pendingIntent);
+                                    if (todoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
+                                        alarmManager.set(AlarmManager.RTC_WAKEUP, todoDateTime.getTimeInMillis(), pendingIntent);
                                 }
                             }, year, month, dayOfMonth);
                             Calendar minDateTime = Calendar.getInstance();

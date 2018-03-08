@@ -3,6 +3,12 @@ package com.hitanshudhawan.todo.utils;
 import android.database.Cursor;
 import android.widget.Filter;
 
+/**
+ * <p>The CursorFilter delegates most of the work to the CursorAdapter.
+ * Subclasses should override these delegate methods to run the queries
+ * and convert the results into String that can be used by auto-completion
+ * widgets.</p>
+ */
 class CursorFilter extends Filter {
 
     CursorFilterClient mClient;

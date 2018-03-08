@@ -127,7 +127,8 @@ public class TodoAddActivity extends AppCompatActivity {
                 intent.putExtra("id", id);
                 intent.putExtra("body", body);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoAddActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
+                if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
             }
         }
         finishAndRemoveTask();

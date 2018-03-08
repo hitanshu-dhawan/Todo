@@ -283,12 +283,4 @@ public abstract class CursorRecyclerAdapter<VH
             notifyItemRangeRemoved(0, getItemCount());
         }
     }
-
-    /**
-     * <p>The CursorFilter delegates most of the work to the CursorAdapter.
-     * Subclasses should override these delegate methods to run the queries
-     * and convert the results into String that can be used by auto-completion
-     * widgets.</p>
-     */
-
 }
