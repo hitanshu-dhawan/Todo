@@ -15,6 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -273,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         int id = item.getItemId();
         switch (id) {
             case R.id.about_item_main:
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://github.com/hitanshu-dhawan/Todo")));
                 break;
         }
         return super.onOptionsItemSelected(item);
