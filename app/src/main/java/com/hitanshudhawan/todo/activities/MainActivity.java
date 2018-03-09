@@ -143,16 +143,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                             getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
                             sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                             // Notification
-                            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                             Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
                             cursor.moveToFirst();
-                            String body = Todo.fromCursor(cursor).getTitle();
-                            Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                            intent.putExtra("id", id);
-                            intent.putExtra("body", body);
-                            PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                            if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0 && Todo.fromCursor(cursor).getDateTime().getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
+                            if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0 && Todo.fromCursor(cursor).getDateTime().getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                String body = Todo.fromCursor(cursor).getTitle();
+                                Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                                intent.putExtra("id", id);
+                                intent.putExtra("body", body);
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 alarmManager.set(AlarmManager.RTC_WAKEUP, Todo.fromCursor(cursor).getDateTime().getTimeInMillis(), pendingIntent);
+                            }
                         }
                     });
                     doneSnackbar.show();
@@ -188,16 +189,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                     getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
                                     sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
                                     // Notification
-                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
-                                    cursor.moveToFirst();
-                                    String body = Todo.fromCursor(cursor).getTitle();
-                                    Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                                    intent.putExtra("id", id);
-                                    intent.putExtra("body", body);
-                                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                    if (todoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
+                                    if (todoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
+                                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                                        cursor.moveToFirst();
+                                        String body = Todo.fromCursor(cursor).getTitle();
+                                        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                                        intent.putExtra("id", id);
+                                        intent.putExtra("body", body);
+                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                         alarmManager.set(AlarmManager.RTC_WAKEUP, todoDateTime.getTimeInMillis(), pendingIntent);
+                                    }
                                 }
                             }, year, month, dayOfMonth);
                             Calendar minDateTime = Calendar.getInstance();

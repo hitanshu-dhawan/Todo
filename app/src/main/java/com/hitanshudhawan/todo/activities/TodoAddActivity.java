@@ -118,17 +118,18 @@ public class TodoAddActivity extends AppCompatActivity {
             Toast.makeText(TodoAddActivity.this, "Todo added", Toast.LENGTH_SHORT).show();
             // Notification
             if (mTodoDateTime != null) {
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                long id = ContentUris.parseId(uri);
-                Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
-                cursor.moveToFirst();
-                String body = Todo.fromCursor(cursor).getTitle();
-                Intent intent = new Intent(TodoAddActivity.this, AlarmReceiver.class);
-                intent.putExtra("id", id);
-                intent.putExtra("body", body);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoAddActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
+                if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    long id = ContentUris.parseId(uri);
+                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                    cursor.moveToFirst();
+                    String body = Todo.fromCursor(cursor).getTitle();
+                    Intent intent = new Intent(TodoAddActivity.this, AlarmReceiver.class);
+                    intent.putExtra("id", id);
+                    intent.putExtra("body", body);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoAddActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
+                }
             }
         }
         finishAndRemoveTask();

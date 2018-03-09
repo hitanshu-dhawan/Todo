@@ -171,16 +171,17 @@ public class TodoDetailsActivity extends AppCompatActivity {
             sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
             // Notification
             if (mDateTimeChanged && mTodoDateTime != null) {
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
-                cursor.moveToFirst();
-                String body = Todo.fromCursor(cursor).getTitle();
-                Intent intent = new Intent(TodoDetailsActivity.this, AlarmReceiver.class);
-                intent.putExtra("id", mTodoId);
-                intent.putExtra("body", body);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoDetailsActivity.this, mTodoId.intValue(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis())
+                if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
+                    cursor.moveToFirst();
+                    String body = Todo.fromCursor(cursor).getTitle();
+                    Intent intent = new Intent(TodoDetailsActivity.this, AlarmReceiver.class);
+                    intent.putExtra("id", mTodoId);
+                    intent.putExtra("body", body);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoDetailsActivity.this, mTodoId.intValue(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                     alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
+                }
             }
         }
         finishAndRemoveTask();
