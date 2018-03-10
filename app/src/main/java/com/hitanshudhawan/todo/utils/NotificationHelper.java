@@ -1,13 +1,18 @@
 package com.hitanshudhawan.todo.utils;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 
 import com.hitanshudhawan.todo.R;
+import com.hitanshudhawan.todo.broadcastreceivers.AlarmReceiver;
+
+import static android.content.Context.ALARM_SERVICE;
 
 /**
  * Created by hitanshu on 6/3/18.
@@ -52,4 +57,23 @@ public class NotificationHelper {
         }
         return notificationManager;
     }
+
+    public void scheduleNotification(long id, String body, long timeInMillis) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        intent.putExtra("id", id);
+        intent.putExtra("body", body);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+    }
+
+    public void cancelScheduledNotification(long id, String body) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        intent.putExtra("id", id);
+        intent.putExtra("body", body);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.cancel(pendingIntent);
+    }
+
 }

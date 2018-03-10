@@ -1,15 +1,11 @@
 package com.hitanshudhawan.todo.activities;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -24,11 +20,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.hitanshudhawan.todo.R;
-import com.hitanshudhawan.todo.broadcastreceivers.AlarmReceiver;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.database.TodoContract;
-import com.hitanshudhawan.todo.utils.Constant;
-import com.hitanshudhawan.todo.widget.TodoWidget;
+import com.hitanshudhawan.todo.utils.Constants;
+import com.hitanshudhawan.todo.utils.NotificationHelper;
+import com.hitanshudhawan.todo.utils.WidgetHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -55,7 +51,7 @@ public class TodoDetailsActivity extends AppCompatActivity {
         mTodoEditText = (EditText) findViewById(R.id.todo_edit_text_todo_details);
         mTodoDateTimeTextView = (TextView) findViewById(R.id.todo_date_time_text_view_todo_details);
 
-        mTodoId = getIntent().getLongExtra(Constant.TODO_ID, -1);
+        mTodoId = getIntent().getLongExtra(Constants.TODO_ID, -1);
         if (mTodoId == -1)
             finishAndRemoveTask();
         Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
@@ -85,7 +81,6 @@ public class TodoDetailsActivity extends AppCompatActivity {
                 break;
             case R.id.todo_date_time_item_todo_details:
                 final Calendar currentDateTime = Calendar.getInstance();
-                // mTodoDateTime = Calendar.getInstance();
                 TimePickerDialog timePickerDialog = new TimePickerDialog(TodoDetailsActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
@@ -136,18 +131,15 @@ public class TodoDetailsActivity extends AppCompatActivity {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_DONE);
                         getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), contentValues, null, null);
-                        sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+
+                        WidgetHelper.updateWidget(TodoDetailsActivity.this);
+
                         Toast.makeText(TodoDetailsActivity.this, "Todo Done.", Toast.LENGTH_SHORT).show();
-                        // Notification
-                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
                         Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
                         cursor.moveToFirst();
-                        String body = Todo.fromCursor(cursor).getTitle();
-                        Intent intent = new Intent(TodoDetailsActivity.this, AlarmReceiver.class);
-                        intent.putExtra("id", mTodoId);
-                        intent.putExtra("body", body);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoDetailsActivity.this, mTodoId.intValue(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        alarmManager.cancel(pendingIntent);
+                        new NotificationHelper(TodoDetailsActivity.this).cancelScheduledNotification(mTodoId, Todo.fromCursor(cursor).getTitle());
+
                         finishAndRemoveTask();
                     }
                 });
@@ -168,19 +160,14 @@ public class TodoDetailsActivity extends AppCompatActivity {
                 contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, mTodoDateTime == null ? 0 : mTodoDateTime.getTimeInMillis());
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
             getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), contentValues, null, null);
-            sendBroadcast(new Intent(TodoDetailsActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
-            // Notification
+
+            WidgetHelper.updateWidget(TodoDetailsActivity.this);
+
             if (mDateTimeChanged && mTodoDateTime != null) {
                 if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
-                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                     Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
                     cursor.moveToFirst();
-                    String body = Todo.fromCursor(cursor).getTitle();
-                    Intent intent = new Intent(TodoDetailsActivity.this, AlarmReceiver.class);
-                    intent.putExtra("id", mTodoId);
-                    intent.putExtra("body", body);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoDetailsActivity.this, mTodoId.intValue(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
+                    new NotificationHelper(TodoDetailsActivity.this).scheduleNotification(mTodoId, Todo.fromCursor(cursor).getTitle(), mTodoDateTime.getTimeInMillis());
                 }
             }
         }

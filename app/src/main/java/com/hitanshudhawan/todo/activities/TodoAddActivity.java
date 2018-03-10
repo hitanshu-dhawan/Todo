@@ -1,13 +1,9 @@
 package com.hitanshudhawan.todo.activities;
 
-import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,10 +19,10 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.hitanshudhawan.todo.R;
-import com.hitanshudhawan.todo.broadcastreceivers.AlarmReceiver;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.database.TodoContract;
-import com.hitanshudhawan.todo.widget.TodoWidget;
+import com.hitanshudhawan.todo.utils.NotificationHelper;
+import com.hitanshudhawan.todo.utils.WidgetHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -114,21 +110,16 @@ public class TodoAddActivity extends AppCompatActivity {
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, mTodoDateTime == null ? 0 : mTodoDateTime.getTimeInMillis());
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
             Uri uri = getContentResolver().insert(TodoContract.TodoEntry.CONTENT_URI, contentValues);
-            sendBroadcast(new Intent(TodoAddActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+
+            WidgetHelper.updateWidget(TodoAddActivity.this);
+
             Toast.makeText(TodoAddActivity.this, "Todo added", Toast.LENGTH_SHORT).show();
-            // Notification
+
             if (mTodoDateTime != null) {
                 if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
-                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                    long id = ContentUris.parseId(uri);
-                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, ContentUris.parseId(uri)), null, null, null, null);
                     cursor.moveToFirst();
-                    String body = Todo.fromCursor(cursor).getTitle();
-                    Intent intent = new Intent(TodoAddActivity.this, AlarmReceiver.class);
-                    intent.putExtra("id", id);
-                    intent.putExtra("body", body);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(TodoAddActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, mTodoDateTime.getTimeInMillis(), pendingIntent);
+                    new NotificationHelper(TodoAddActivity.this).scheduleNotification(ContentUris.parseId(uri), Todo.fromCursor(cursor).getTitle(), mTodoDateTime.getTimeInMillis());
                 }
             }
         }

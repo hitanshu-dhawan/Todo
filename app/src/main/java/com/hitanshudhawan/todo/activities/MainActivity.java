@@ -1,10 +1,7 @@
 package com.hitanshudhawan.todo.activities;
 
-import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.appwidget.AppWidgetManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -40,10 +37,10 @@ import android.widget.TimePicker;
 
 import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.adapters.TodoCursorAdapter;
-import com.hitanshudhawan.todo.broadcastreceivers.AlarmReceiver;
 import com.hitanshudhawan.todo.database.Todo;
 import com.hitanshudhawan.todo.database.TodoContract;
-import com.hitanshudhawan.todo.widget.TodoWidget;
+import com.hitanshudhawan.todo.utils.NotificationHelper;
+import com.hitanshudhawan.todo.utils.WidgetHelper;
 
 import java.util.Calendar;
 
@@ -82,8 +79,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mTodoCursorAdapter = new TodoCursorAdapter(MainActivity.this);
         mTodoRecyclerView.setAdapter(mTodoCursorAdapter);
         mTodoRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
-        // mTodoRecyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this,DividerItemDecoration.VERTICAL));
+
         mEmptyView = (LinearLayout) findViewById(R.id.empty_view);
+
         mTodoCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
@@ -94,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                         null);
             }
         });
+
         getSupportLoaderManager().initLoader(0, null, MainActivity.this);
 
         mTodoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -118,43 +117,33 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
 
                 final long id = mTodoCursorAdapter.getItemId(viewHolder.getAdapterPosition());
+                final Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
+                cursor.moveToFirst();
 
                 if (direction == ItemTouchHelper.RIGHT) {
                     // Todo Done.
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_DONE);
                     getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
-                    sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+
+                    WidgetHelper.updateWidget(MainActivity.this);
+
+                    new NotificationHelper(MainActivity.this).cancelScheduledNotification(id, Todo.fromCursor(cursor).getTitle());
+
                     Snackbar doneSnackbar = Snackbar.make(viewHolder.itemView, "Todo Done.", Snackbar.LENGTH_LONG);
-                    // Notification
-                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                    Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
-                    cursor.moveToFirst();
-                    String body = Todo.fromCursor(cursor).getTitle();
-                    Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                    intent.putExtra("id", id);
-                    intent.putExtra("body", body);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    alarmManager.cancel(pendingIntent);
                     doneSnackbar.setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DONE, TodoContract.TodoEntry.TODO_NOT_DONE);
                             getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
-                            sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
-                            // Notification
-                            Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
-                            cursor.moveToFirst();
+
+                            WidgetHelper.updateWidget(MainActivity.this);
+
                             if (Todo.fromCursor(cursor).getDateTime().getTimeInMillis() != 0 && Todo.fromCursor(cursor).getDateTime().getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
-                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                String body = Todo.fromCursor(cursor).getTitle();
-                                Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                                intent.putExtra("id", id);
-                                intent.putExtra("body", body);
-                                PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, Todo.fromCursor(cursor).getDateTime().getTimeInMillis(), pendingIntent);
+                                new NotificationHelper(MainActivity.this).scheduleNotification(id, Todo.fromCursor(cursor).getTitle(), Todo.fromCursor(cursor).getDateTime().getTimeInMillis());
                             }
+
                         }
                     });
                     doneSnackbar.show();
@@ -188,18 +177,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                     ContentValues contentValues = new ContentValues();
                                     contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_DATE_TIME, todoDateTime.getTimeInMillis());
                                     getContentResolver().update(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), contentValues, null, null);
-                                    sendBroadcast(new Intent(MainActivity.this, TodoWidget.class).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
-                                    // Notification
+
+                                    WidgetHelper.updateWidget(MainActivity.this);
+
                                     if (todoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
-                                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                                         Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
                                         cursor.moveToFirst();
-                                        String body = Todo.fromCursor(cursor).getTitle();
-                                        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                                        intent.putExtra("id", id);
-                                        intent.putExtra("body", body);
-                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, (int) id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                        alarmManager.set(AlarmManager.RTC_WAKEUP, todoDateTime.getTimeInMillis(), pendingIntent);
+                                        new NotificationHelper(MainActivity.this).scheduleNotification(id, Todo.fromCursor(cursor).getTitle(), todoDateTime.getTimeInMillis());
                                     }
                                 }
                             }, year, month, dayOfMonth);
@@ -210,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                         }
                     }, currentDateTime.get(Calendar.HOUR_OF_DAY), currentDateTime.get(Calendar.MINUTE), DateFormat.is24HourFormat(MainActivity.this));
                     timePickerDialog.show();
-                    mTodoCursorAdapter.notifyItemChanged(viewHolder.getAdapterPosition());
                 }
             }
 

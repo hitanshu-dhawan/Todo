@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.hitanshudhawan.todo.R;
 import com.hitanshudhawan.todo.activities.TodoDetailsActivity;
 import com.hitanshudhawan.todo.database.Todo;
-import com.hitanshudhawan.todo.utils.Constant;
+import com.hitanshudhawan.todo.utils.Constants;
 import com.hitanshudhawan.todo.utils.CursorRecyclerAdapter;
 
 import java.text.SimpleDateFormat;
@@ -46,7 +46,7 @@ public class TodoCursorAdapter extends CursorRecyclerAdapter<TodoCursorAdapter.T
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, TodoDetailsActivity.class);
-                intent.putExtra(Constant.TODO_ID, todo.getId());
+                intent.putExtra(Constants.TODO_ID, todo.getId());
                 context.startActivity(intent);
             }
         });

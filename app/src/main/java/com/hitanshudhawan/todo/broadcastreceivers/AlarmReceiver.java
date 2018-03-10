@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.hitanshudhawan.todo.activities.TodoDetailsActivity;
-import com.hitanshudhawan.todo.utils.Constant;
+import com.hitanshudhawan.todo.utils.Constants;
 import com.hitanshudhawan.todo.utils.NotificationHelper;
 
 /**
@@ -22,7 +22,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         String title = "Todo Pending...";
         String body = intent.getStringExtra("body");
         Intent activityIntent = new Intent(context, TodoDetailsActivity.class);
-        activityIntent.putExtra(Constant.TODO_ID, id);
+        activityIntent.putExtra(Constants.TODO_ID, id);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, (int) id, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationHelper.notify((int) id, title, body, pendingIntent);
     }
