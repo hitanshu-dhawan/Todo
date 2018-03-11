@@ -6,6 +6,7 @@ import android.app.TimePickerDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -51,7 +52,17 @@ public class TodoDetailsActivity extends AppCompatActivity {
         mTodoEditText = (EditText) findViewById(R.id.todo_edit_text_todo_details);
         mTodoDateTimeTextView = (TextView) findViewById(R.id.todo_date_time_text_view_todo_details);
 
-        mTodoId = getIntent().getLongExtra(Constants.TODO_ID, -1);
+        init(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        init(intent);
+    }
+
+    private void init(Intent intent) {
+        mTodoId = intent.getLongExtra(Constants.TODO_ID, -1);
         if (mTodoId == -1)
             finishAndRemoveTask();
         Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
@@ -163,7 +174,7 @@ public class TodoDetailsActivity extends AppCompatActivity {
 
             WidgetHelper.updateWidget(TodoDetailsActivity.this);
 
-            if (mDateTimeChanged && mTodoDateTime != null) {
+            if (mTodoDateTime != null && mTodoDateTime.getTimeInMillis() != 0) {
                 if (mTodoDateTime.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
                     Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, mTodoId), null, null, null, null);
                     cursor.moveToFirst();

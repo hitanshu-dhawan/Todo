@@ -41,14 +41,19 @@ public class NotificationHelper {
         getNotificationManager().createNotificationChannel(notificationChannel);
     }
 
-    public void notify(Integer id, String title, String body, PendingIntent pendingIntent) {
+    public void notify(Integer id, String title, String body, PendingIntent pendingIntent, Notification.Action action) {
         Notification.Builder notificationBuilder = new Notification.Builder(context, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setSmallIcon(R.mipmap.ic_done_all_black_48dp)
                 .setAutoCancel(true)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .addAction(action);
         getNotificationManager().notify(id, notificationBuilder.build());
+    }
+
+    public void dismissNotification(Integer id) {
+        getNotificationManager().cancel(id);
     }
 
     private NotificationManager getNotificationManager() {

@@ -194,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                         }
                     }, currentDateTime.get(Calendar.HOUR_OF_DAY), currentDateTime.get(Calendar.MINUTE), DateFormat.is24HourFormat(MainActivity.this));
                     timePickerDialog.show();
+                    mTodoCursorAdapter.notifyItemChanged(viewHolder.getAdapterPosition());
                 }
             }
 

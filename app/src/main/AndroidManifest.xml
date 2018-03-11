@@ -16,7 +16,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.shortcuts"
+            <meta-data
+                android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
 
@@ -25,7 +26,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.TodoDetailsActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop"/>
 
         <provider
             android:name=".database.TodoProvider"
@@ -47,6 +49,8 @@
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <receiver android:name=".broadcastreceivers.AlarmReceiver" />
+
+        <service android:name=".services.TodoDoneIntentService" />
 
     </application>
 
