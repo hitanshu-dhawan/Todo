@@ -19,7 +19,9 @@
 <li>Cursor Adapter</li>
 <li>Widget</li>
 <li>Notification</li>
-<li>AppShortcut</li>
+<li>Notification Action</li>
+<li>IntentService</li>
+<li>App Shortcut</li>
 <li>BroadcastReceiver</li>
 </ul>
 
