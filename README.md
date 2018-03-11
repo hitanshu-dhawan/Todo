@@ -1,3 +1,11 @@
+[![Hitanshu Dhawan](https://img.shields.io/badge/Hitanshu-Dhawan-blue.svg)](https://github.com/hitanshu-dhawan)
+[![Open Source Love png2](https://badges.frapsoft.com/os/v2/open-source.png?v=103)](https://github.com/hitanshu-dhawan/Todo)
+[![License](https://img.shields.io/badge/License-Apache--2.0-green.svg)](https://github.com/hitanshu-dhawan/Todo/blob/master/LICENSE)
+
+[![GitHub followers](https://img.shields.io/github/followers/hitanshu-dhawan.svg?style=social&logo=github&label=Follow)](https://github.com/hitanshu-dhawan)
+[![GitHub stars](https://img.shields.io/github/stars/hitanshu-dhawan/Todo.svg?style=social&logo=github&label=Stars)](https://github.com/hitanshu-dhawan/Todo)
+[![GitHub forks](https://img.shields.io/github/forks/hitanshu-dhawan/Todo.svg?style=social&logo=github&label=Fork)](https://github.com/hitanshu-dhawan/Todo)
+
 <img src="/images/web_hi_res_512.png" height=250 width=250></img>
 
 <b>Simple Todo App to demonstrate Content Providers, Cursor Loaders, Cursor Adapters, Widgets, Notifications and much more.</b>
