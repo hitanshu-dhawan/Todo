@@ -45,12 +45,12 @@ public class TodoDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo_details);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mTodoEditText = (EditText) findViewById(R.id.todo_edit_text_todo_details);
-        mTodoDateTimeTextView = (TextView) findViewById(R.id.todo_date_time_text_view_todo_details);
+        mTodoEditText = findViewById(R.id.todo_edit_text_todo_details);
+        mTodoDateTimeTextView = findViewById(R.id.todo_date_time_text_view_todo_details);
 
         init(getIntent());
     }

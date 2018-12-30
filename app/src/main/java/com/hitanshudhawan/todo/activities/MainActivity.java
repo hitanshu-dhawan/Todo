@@ -14,6 +14,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         initFab();
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void initFab() {
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab = findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,12 +76,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void initRecyclerView() {
-        mTodoRecyclerView = (RecyclerView) findViewById(R.id.todo_recycler_view);
+        mTodoRecyclerView = findViewById(R.id.todo_recycler_view);
         mTodoCursorAdapter = new TodoCursorAdapter(MainActivity.this);
         mTodoRecyclerView.setAdapter(mTodoCursorAdapter);
         mTodoRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
 
-        mEmptyView = (LinearLayout) findViewById(R.id.empty_view);
+        mEmptyView = findViewById(R.id.empty_view);
 
         mTodoCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mTodoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mFab.show();
@@ -109,12 +110,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
             }
 
             @Override
-            public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
+            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
 
                 final long id = mTodoCursorAdapter.getItemId(viewHolder.getAdapterPosition());
                 final Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TodoContract.TodoEntry.CONTENT_URI, id), null, null, null, null);
@@ -199,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
 
             @Override
-            public void onChildDraw(Canvas canvas, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            public void onChildDraw(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 super.onChildDraw(canvas, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
                 View itemView = viewHolder.itemView;
@@ -264,6 +265,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         return new CursorLoader(MainActivity.this,
@@ -275,13 +277,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
         mTodoCursorAdapter.swapCursor(data);
         mEmptyView.setVisibility(mTodoCursorAdapter.getItemCount() == 0 ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
         mTodoCursorAdapter.swapCursor(null);
     }
 }

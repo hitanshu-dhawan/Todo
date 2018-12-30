@@ -3,6 +3,7 @@ package com.hitanshudhawan.todo.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -32,8 +33,9 @@ public class TodoCursorAdapter extends CursorRecyclerAdapter<TodoCursorAdapter.T
         this.context = context;
     }
 
+    @NonNull
     @Override
-    public TodoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TodoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new TodoViewHolder(LayoutInflater.from(context).inflate(R.layout.item_todo, parent, false));
     }
 
@@ -60,9 +62,9 @@ public class TodoCursorAdapter extends CursorRecyclerAdapter<TodoCursorAdapter.T
 
         public TodoViewHolder(View itemView) {
             super(itemView);
-            todoLayout = (ConstraintLayout) itemView.findViewById(R.id.todo_layout_item);
-            todoTitleTextView = (TextView) itemView.findViewById(R.id.todo_title_text_view_item);
-            todoDateTimeTextView = (TextView) itemView.findViewById(R.id.todo_date_time_text_view_item);
+            todoLayout = itemView.findViewById(R.id.todo_layout_item);
+            todoTitleTextView = itemView.findViewById(R.id.todo_title_text_view_item);
+            todoDateTimeTextView = itemView.findViewById(R.id.todo_date_time_text_view_item);
         }
     }
 
