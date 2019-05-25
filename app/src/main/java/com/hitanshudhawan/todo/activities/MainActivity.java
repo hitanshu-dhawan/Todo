@@ -22,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -80,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mTodoCursorAdapter = new TodoCursorAdapter(MainActivity.this);
         mTodoRecyclerView.setAdapter(mTodoCursorAdapter);
         mTodoRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        itemDecoration.setDrawable(getDrawable(R.drawable.divider));
+        mTodoRecyclerView.addItemDecoration(itemDecoration);
 
         mEmptyView = findViewById(R.id.empty_view);
 
