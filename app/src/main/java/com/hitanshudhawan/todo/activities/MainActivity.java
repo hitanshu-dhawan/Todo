@@ -46,6 +46,8 @@ import com.hitanshudhawan.todo.utils.WidgetHelper;
 
 import java.util.Calendar;
 
+import javax.security.auth.Subject;
+
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -264,6 +266,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         switch (id) {
             case R.id.about_item_main:
                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://github.com/hitanshu-dhawan/Todo")));
+                break;
+
+            case R.id.share:
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                String shareSubject = "To Do Android App";
+                String shareBody = "This is the best Android App to listing the TO DO Activities in this Android App.";
+                sharingIntent.putExtra(Intent.EXTRA_TEXT,shareBody);
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT,shareSubject);
+                startActivity(Intent.createChooser(sharingIntent,"Share using: "));
                 break;
         }
         return super.onOptionsItemSelected(item);
