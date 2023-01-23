@@ -13,5 +13,9 @@
     <item
         android:id="@+id/about_item_main"
         android:title="About" />
+    <item
+        android:id="@+id/share"
+        android:title="Share"
+        android:icon="@drawable/share"/>
 
 </menu>

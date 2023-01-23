@@ -29,10 +29,10 @@ import java.util.Calendar;
 
 public class TodoAddActivity extends AppCompatActivity {
 
-    private EditText mTodoEditText;
+    private EditText mTodoEditText,mTodoEditText1;
     private TextView mTodoDateTimeTextView;
 
-    private String mTodoTitle;
+    private String mTodoTitle,mTodoBody;
     private Calendar mTodoDateTime;
 
     @Override
@@ -44,6 +44,7 @@ public class TodoAddActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mTodoEditText = findViewById(R.id.todo_edit_text_todo_add);
+        mTodoEditText1 = findViewById(R.id.todo_edit_text_todo_content);
         mTodoDateTimeTextView = findViewById(R.id.todo_date_time_text_view_todo_add);
     }
 
@@ -104,6 +105,7 @@ public class TodoAddActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         mTodoTitle = mTodoEditText.getText().toString().trim();
+        mTodoBody = mTodoEditText1.getText().toString().trim();
         if (!mTodoTitle.equals("")) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(TodoContract.TodoEntry.COLUMN_TODO_TITLE, mTodoTitle);

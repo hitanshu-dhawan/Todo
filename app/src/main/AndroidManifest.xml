@@ -12,17 +12,23 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activities.SplashScreenActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-
         <activity
             android:name=".activities.TodoAddActivity"
             android:theme="@style/AppTheme.NoActionBar"
@@ -55,7 +61,6 @@
         <receiver android:name=".broadcastreceivers.AlarmReceiver" />
 
         <service android:name=".services.TodoDoneIntentService" />
-
     </application>
 
 </manifest>
